@@ -18,6 +18,7 @@ Contact: rowan.wisere@gmail.com
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a0a0b">
 <title>Water Coach</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="topbar.js" defer></script>
 
 <!-- =============================================================
@@ -1090,6 +1091,106 @@ html, body {
 
   // BOOT
   renderAll();
+
+  // ======= Cloud sync =======
+  (function () {
+    const _U = 'https://rsoobyusmktmoewlcjnq.supabase.co';
+    const _K = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzb29ieXVzbWt0bW9ld2xjam5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5ODE2MDgsImV4cCI6MjA5NTU1NzYwOH0.erJXvbrZclXGVRAOp52cBD4Dzp6_BDiKyF0MupsBT1g';
+    const _R = 'health';
+    let _supa = null, _timer = null, _suppress = false, _lastJson = null, _fullRow = {};
+
+    function _isOurs(k) { return k === LS_KEY; }
+    function _collect() {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return {};
+      try { return { [LS_KEY]: JSON.parse(raw) }; } catch { return {}; }
+    }
+    function _extract(remote) {
+      return (remote && remote[LS_KEY]) ? { [LS_KEY]: remote[LS_KEY] } : {};
+    }
+    function _apply(remote) {
+      if (!remote || !remote[LS_KEY]) return false;
+      const inc = JSON.stringify(remote[LS_KEY]);
+      if (localStorage.getItem(LS_KEY) === inc) return false;
+      _orig(LS_KEY, inc);
+      try { state = normalize(remote[LS_KEY]); } catch (_e) {}
+      return true;
+    }
+    function _rerender() { try { renderAll(); } catch (_e) {} }
+
+    async function _push() {
+      if (!_supa) return;
+      const local = _collect();
+      const json = JSON.stringify(local);
+      if (json === _lastJson) return;
+      try {
+        const { data: rd } = await _supa.from('app_state').select('data').eq('key', _R).maybeSingle();
+        _fullRow = (rd && rd.data) || {};
+        const merged = Object.assign({}, _fullRow, local);
+        const { error } = await _supa.from('app_state').upsert(
+          { key: _R, data: merged, updated_at: new Date().toISOString() },
+          { onConflict: 'key' }
+        );
+        if (!error) _lastJson = json;
+      } catch (_e) {}
+    }
+    function _schedule() {
+      if (_suppress) return;
+      clearTimeout(_timer);
+      _timer = setTimeout(_push, 300);
+    }
+    function _flush() {
+      if (!_supa) return;
+      const local = _collect();
+      if (JSON.stringify(local) === _lastJson) return;
+      try {
+        fetch(_U + '/rest/v1/app_state?on_conflict=key', {
+          method: 'POST',
+          headers: { apikey: _K, Authorization: 'Bearer ' + _K, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' },
+          body: JSON.stringify({ key: _R, data: Object.assign({}, _fullRow, local), updated_at: new Date().toISOString() }),
+          keepalive: true
+        }).catch(() => {});
+      } catch (_e) {}
+    }
+
+    const _orig = localStorage.setItem.bind(localStorage);
+    const _origDel = localStorage.removeItem.bind(localStorage);
+    localStorage.setItem = function (k, v) { _orig(k, v); if (!_suppress && _isOurs(k)) _schedule(); };
+    localStorage.removeItem = function (k) { _origDel(k); if (!_suppress && _isOurs(k)) _schedule(); };
+    window.addEventListener('pagehide', _flush);
+    window.addEventListener('beforeunload', _flush);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) _flush(); });
+
+    (async function () {
+      if (!window.supabase) return;
+      _supa = window.supabase.createClient(_U, _K);
+      try {
+        const { data: fd, error: fe } = await _supa.from('app_state').select('data').eq('key', _R).maybeSingle();
+        if (!fe && fd && fd.data) {
+          _fullRow = fd.data;
+          _suppress = true;
+          try { _apply(fd.data); } finally { _suppress = false; }
+          _lastJson = JSON.stringify(_collect());
+          _rerender();
+        } else if (Object.keys(_collect()).length > 0) {
+          _schedule();
+        }
+      } catch (_e) {}
+      _supa.channel('water_health_ch')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'app_state', filter: 'key=eq.' + _R },
+          payload => {
+            if (!payload.new || !payload.new.data) return;
+            _fullRow = payload.new.data;
+            const oursJson = JSON.stringify(_extract(payload.new.data));
+            if (oursJson === _lastJson) return;
+            _lastJson = oursJson;
+            _suppress = true;
+            try { _apply(payload.new.data); } finally { _suppress = false; }
+            _rerender();
+          })
+        .subscribe();
+    })();
+  })();
 })();
 </script>
 <style>

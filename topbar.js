@@ -408,12 +408,28 @@ body.topbar-modal-open {
     sync();
   }
 
+  // -------- Pull water count from Supabase so topbar is accurate on any page --------
+  async function initTopbarSync() {
+    if (!window.supabase || TOPBAR_SUPABASE_URL.indexOf('PASTE-') === 0) return;
+    try {
+      const supa = window.supabase.createClient(TOPBAR_SUPABASE_URL, TOPBAR_SUPABASE_KEY);
+      const { data } = await supa.from('app_state').select('data').eq('key', 'health').maybeSingle();
+      if (!data || !data.data || !data.data.po_water_v1) return;
+      const inc = JSON.stringify(data.data.po_water_v1);
+      if (localStorage.getItem('po_water_v1') !== inc) {
+        try { localStorage.setItem('po_water_v1', inc); } catch (_) {}
+        render();
+      }
+    } catch (_) {}
+  }
+
   // -------- Boot --------
   function boot() {
     injectStyleAndHTML();
     const btn = document.getElementById('topbarWaterAdd');
     if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); addWater(); });
     render();
+    initTopbarSync();
     lockGestures();
     startModalLock();
 
