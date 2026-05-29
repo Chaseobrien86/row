@@ -11,7 +11,9 @@
 :root {
   --bg: #050506;
   --bg-card: rgba(255, 255, 255, 0.04);
+  --bg-input: rgba(0, 0, 0, 0.30);
   --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
   --text-primary: #FAFAFA;
   --text-secondary: #B8B6B0;
   --text-tertiary: #76746E;
@@ -31,105 +33,242 @@ html, body {
   min-height: 100vh;
 }
 
-.page { max-width: 480px; margin: 0 auto; padding: 28px 16px 24px; }
+.page { max-width: 480px; margin: 0 auto; padding: 24px 16px 16px; }
 
+/* ── Header row ── */
+.page-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 22px;
+}
 .page-eyebrow {
   font: 700 10px/1 var(--font); letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--text-tertiary); margin-bottom: 5px;
+  color: var(--text-tertiary); margin-bottom: 4px;
 }
-.page-title {
-  font: 700 30px/1.1 var(--font); color: var(--text-primary); margin-bottom: 28px;
+.page-title { font: 700 30px/1.1 var(--font); color: var(--text-primary); }
+.gear-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-tertiary); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: color 0.15s, background 0.15s; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent; margin-bottom: 3px;
 }
+.gear-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.07); }
+.gear-btn:active { transform: scale(0.93); }
 
+/* ── Main tracker card ── */
 .water-card {
   background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 20px; padding: 28px 24px 24px;
-  margin-bottom: 12px;
+  border-radius: 20px; padding: 22px 20px 20px;
+  margin-bottom: 10px;
 }
-
-.today-label {
+.intake-label {
   font: 700 10px/1 var(--font); letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--text-tertiary); margin-bottom: 22px; text-align: center;
+  color: var(--text-tertiary); margin-bottom: 16px; text-align: center;
 }
-
 .water-count-row {
-  display: flex; align-items: center; gap: 24px;
-  justify-content: center; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 18px;
+  justify-content: center; margin-bottom: 5px;
 }
 .water-btn {
-  width: 60px; height: 60px; border-radius: 50%;
-  background: rgba(125, 211, 252, 0.10);
-  border: 1px solid rgba(125, 211, 252, 0.22);
-  color: var(--water); font-size: 28px; font-weight: 300; cursor: pointer;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: rgba(125,211,252,0.10); border: 1px solid rgba(125,211,252,0.22);
+  color: var(--water); font-size: 26px; font-weight: 300; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s, transform 0.1s; flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
 }
-.water-btn:hover  { background: rgba(125, 211, 252, 0.18); }
+.water-btn:hover  { background: rgba(125,211,252,0.18); }
 .water-btn:active { transform: scale(0.88); }
-.water-btn-plus   { background: rgba(125, 211, 252, 0.17); }
-
-.water-count-display {
-  text-align: center; display: flex; align-items: baseline; gap: 6px;
-}
-.water-num {
-  font: 700 68px/1 var(--font-mono);
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-.water-sep  { font: 300 30px/1 var(--font-mono); color: var(--text-quaternary); }
-.water-goal { font-size: 38px !important; color: var(--text-tertiary) !important; }
-
+.water-btn-plus   { background: rgba(125,211,252,0.17); }
+.water-count-display { text-align: center; display: flex; align-items: baseline; gap: 5px; }
+.water-num { font: 700 64px/1 var(--font-mono); color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.water-sep  { font: 300 28px/1 var(--font-mono); color: var(--text-quaternary); }
+.water-goal { font-size: 36px !important; color: var(--text-tertiary) !important; }
 .water-unit-label {
-  text-align: center; font-size: 13px; color: var(--text-tertiary); margin-bottom: 22px;
+  text-align: center; font-size: 12px; color: var(--text-tertiary); margin-bottom: 14px;
 }
-
 .water-bar-track {
   height: 6px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden;
 }
 .water-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--water), var(--water-2));
+  height: 100%; background: linear-gradient(90deg, var(--water), var(--water-2));
   border-radius: 99px; transition: width 0.35s ease;
 }
 
-/* 14-day history */
+/* ── "Why this amount?" accordion ── */
+.why-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden; margin-bottom: 10px;
+}
+.why-toggle {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  background: none; border: none; cursor: pointer; color: var(--text-tertiary);
+  font: 600 12px/1 var(--font); letter-spacing: 0.03em;
+  -webkit-tap-highlight-color: transparent; transition: color 0.15s;
+}
+.why-toggle:hover { color: var(--text-secondary); }
+.why-chevron { font-size: 9px; transition: transform 0.22s ease; display: inline-block; }
+.why-card.open .why-chevron { transform: rotate(90deg); }
+.why-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.28s ease;
+}
+.why-card.open .why-body { max-height: 360px; }
+.why-inner { padding: 0 16px 16px; }
+.why-rows { border-top: 1px solid var(--border); padding-top: 10px; }
+.why-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 5px 0; font-size: 13px;
+}
+.why-row-label { color: var(--text-tertiary); }
+.why-row-value { color: var(--text-secondary); font-family: var(--font-mono); font-size: 12px; }
+.why-row-value.add { color: var(--water); }
+.why-divider { height: 1px; background: var(--border); margin: 8px 0 6px; }
+.why-total {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 13px; font-weight: 600;
+}
+.why-total-label { color: var(--text-secondary); }
+.why-total-value { color: var(--text-primary); font-family: var(--font-mono); font-size: 12px; }
+.why-note {
+  font-size: 11px; color: var(--text-quaternary); margin-top: 8px; line-height: 1.5;
+}
+
+/* ── 14-day history ── */
 .hist-card {
   background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 20px; padding: 20px 20px 18px;
+  border-radius: 20px; padding: 18px 18px 16px;
 }
 .hist-label {
   font: 700 10px/1 var(--font); letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--text-tertiary); margin-bottom: 12px;
 }
 .hist-grid {
-  display: grid; grid-template-columns: repeat(14, 1fr); gap: 3px;
-  align-items: end; height: 64px;
+  display: grid; grid-template-columns: repeat(14,1fr); gap: 3px;
+  align-items: end; height: 60px;
 }
-.hist-bar {
-  background: rgba(125, 211, 252, 0.20); border-radius: 3px 3px 0 0; min-height: 4px;
-  transition: height 0.2s ease;
+.hist-bar { background: rgba(125,211,252,0.20); border-radius: 3px 3px 0 0; min-height: 4px; }
+.hist-bar.today { background: rgba(125,211,252,0.70); }
+.hist-bar.done  { background: rgba(110,231,183,0.55); }
+
+/* ── Settings modal (bottom sheet) ── */
+.modal-bg {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.68);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
 }
-.hist-bar.today { background: rgba(125, 211, 252, 0.70); }
-.hist-bar.done  { background: rgba(110, 231, 183, 0.55); }
+.modal-bg.show { opacity: 1; pointer-events: all; }
+.modal {
+  background: #111113; border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 24px 24px 0 0;
+  width: 100%; max-width: 480px;
+  padding-bottom: max(28px, env(safe-area-inset-bottom));
+  transform: translateY(28px);
+  transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+  max-height: 93vh; overflow-y: auto; overscroll-behavior: contain;
+}
+.modal-bg.show .modal { transform: translateY(0); }
+.modal-handle {
+  width: 36px; height: 4px; border-radius: 99px;
+  background: rgba(255,255,255,0.14); margin: 12px auto 18px;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px 14px; border-bottom: 1px solid var(--border);
+}
+.modal-title { font: 700 17px/1 var(--font); color: var(--text-primary); }
+.modal-close {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: none;
+  color: var(--text-secondary); font-size: 16px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent; transition: background 0.15s;
+}
+.modal-close:hover { background: rgba(255,255,255,0.14); }
+.modal-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+/* Form fields */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field-label {
+  font: 700 10px/1 var(--font); letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.input-wrap { position: relative; display: flex; align-items: center; }
+.field-input {
+  width: 100%; background: var(--bg-input);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 42px 12px 14px; color: var(--text-primary);
+  font: 500 15px/1 var(--font); outline: none;
+  -webkit-appearance: none; appearance: none; transition: border-color 0.15s;
+}
+.field-input:focus { border-color: rgba(125,211,252,0.38); }
+.field-input::-webkit-inner-spin-button,
+.field-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.input-suffix {
+  position: absolute; right: 13px;
+  font: 500 12px/1 var(--font); color: var(--text-quaternary); pointer-events: none;
+}
+.sex-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.sex-btn {
+  padding: 12px; border-radius: 10px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  color: var(--text-tertiary); font: 600 13px/1 var(--font);
+  cursor: pointer; transition: all 0.15s; text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.sex-btn:hover { color: var(--text-secondary); }
+.sex-btn.active {
+  background: rgba(125,211,252,0.12); border-color: rgba(125,211,252,0.34);
+  color: var(--water);
+}
+.save-btn {
+  width: 100%; padding: 14px; border-radius: 12px;
+  background: linear-gradient(135deg, rgba(125,211,252,0.16), rgba(110,231,183,0.16));
+  border: 1px solid rgba(125,211,252,0.26);
+  color: var(--text-primary); font: 700 14px/1 var(--font); letter-spacing: 0.02em;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent; margin-top: 4px;
+}
+.save-btn:hover { background: linear-gradient(135deg, rgba(125,211,252,0.24), rgba(110,231,183,0.24)); }
+.save-btn:active { transform: scale(0.98); }
+
+/* Desktop: center the modal instead of bottom sheet */
+@media (min-width: 520px) {
+  .modal-bg { align-items: center; }
+  .modal {
+    border-radius: 20px; max-height: 85vh;
+    width: calc(100% - 40px); max-width: 400px;
+  }
+}
 </style>
 </head>
 <body>
 
 <main class="page">
-  <div class="page-eyebrow">Today</div>
-  <div class="page-title">Water</div>
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-eyebrow">Today</div>
+      <div class="page-title">Water</div>
+    </div>
+    <button class="gear-btn" id="gearBtn" aria-label="Open settings">⚙️</button>
+  </div>
 
+  <!-- Tracker card -->
   <div class="water-card">
-    <div class="today-label">Intake</div>
+    <div class="intake-label">Intake</div>
     <div class="water-count-row">
-      <button class="water-btn" id="wMinus" aria-label="Remove one drink">−</button>
+      <button class="water-btn" id="wMinus" aria-label="Remove one">−</button>
       <div class="water-count-display">
         <span class="water-num" id="wDone">0</span>
         <span class="water-sep">/</span>
         <span class="water-num water-goal" id="wGoal">8</span>
       </div>
-      <button class="water-btn water-btn-plus" id="wPlus" aria-label="Add one drink">+</button>
+      <button class="water-btn water-btn-plus" id="wPlus" aria-label="Add one">+</button>
     </div>
     <div class="water-unit-label" id="wUnitLabel">bottles today</div>
     <div class="water-bar-track">
@@ -137,11 +276,72 @@ html, body {
     </div>
   </div>
 
+  <!-- "Why this amount?" accordion -->
+  <div class="why-card" id="whyCard">
+    <button class="why-toggle" id="whyToggle" aria-expanded="false">
+      <span>Why this amount?</span>
+      <span class="why-chevron">▶</span>
+    </button>
+    <div class="why-body" id="whyBody">
+      <div class="why-inner">
+        <div class="why-rows" id="whyRows"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 14-day history -->
   <div class="hist-card">
     <div class="hist-label">Last 14 days</div>
     <div class="hist-grid" id="wHistGrid"></div>
   </div>
 </main>
+
+<!-- Settings modal -->
+<div class="modal-bg" id="settingsModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Settings</span>
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="field">
+        <div class="field-label">Body Weight</div>
+        <div class="input-wrap">
+          <input class="field-input" id="inputWeight" type="number" min="50" max="500" placeholder="160" inputmode="decimal">
+          <span class="input-suffix">lbs</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Age</div>
+        <div class="input-wrap">
+          <input class="field-input" id="inputAge" type="number" min="10" max="120" placeholder="30" inputmode="decimal">
+          <span class="input-suffix">yrs</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Sex</div>
+        <div class="sex-toggle">
+          <button class="sex-btn" id="sexMale"   data-sex="m">Male</button>
+          <button class="sex-btn" id="sexFemale" data-sex="f">Female</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Daily Caffeine</div>
+        <div class="input-wrap">
+          <input class="field-input" id="inputCaffeine" type="number" min="0" max="2000" placeholder="0" inputmode="decimal">
+          <span class="input-suffix">mg</span>
+        </div>
+      </div>
+
+      <button class="save-btn" id="saveBtn">Save &amp; Recalculate</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -149,6 +349,7 @@ html, body {
 
   const LS_KEY = 'po_water_v1';
 
+  // ── Helpers ──────────────────────────────────────────────
   function dateKey(d) {
     return d.getFullYear() + '-' +
       String(d.getMonth() + 1).padStart(2, '0') + '-' +
@@ -158,42 +359,54 @@ html, body {
 
   function loadState() {
     try { const r = localStorage.getItem(LS_KEY); if (r) return JSON.parse(r); } catch (_e) {}
-    return { unit: 'bottle', bottleMl: 500, glassMl: 250, logs: {} };
+    return {
+      unit: 'bottle', bottleMl: 500, glassMl: 250, logs: {},
+      profile: { weightKg: 72.6, age: 30, sex: 'm' },
+      caffeineMgPerDay: 0
+    };
   }
   function saveState(s) {
     try { localStorage.setItem(LS_KEY, JSON.stringify(s)); } catch (_e) {}
   }
-  function getTarget(s) {
-    const p = s.profile || {};
-    const wKg = s.weightUnit === 'lb' ? ((p.weightKg || 75) / 2.20462) : (p.weightKg || 75);
-    const base    = wKg * 35;
-    const exercise = ((p.activityHrsPerWeek || 0) / 7) * 500;
-    let vol;
-    if      (s.unit === 'glass') vol = s.glassMl  || 250;
-    else if (s.unit === 'oz')    vol = 30;
-    else if (s.unit === 'ml')    vol = 1;
-    else                         vol = s.bottleMl || 500;
-    return Math.max(1, Math.ceil((base + exercise) / vol));
-  }
-  function unitLabel(s) {
-    if (s.unit === 'glass') return 'glasses today';
-    if (s.unit === 'oz')    return 'oz servings today';
-    if (s.unit === 'ml')    return 'ml today';
-    return 'bottles today';
+
+  // ── Target calculation ─────────────────────────────────
+  // Formula (US-friendly, oz-based):
+  //   Base    = bodyWeight(lbs) ÷ 2
+  //   Caffeine= +8 oz per 200 mg (each 100 mg → +4 oz)
+  //   Male    = +8 oz
+  //   Age ≥55 = +8 oz
+  // Total oz → convert to bottles via bottleMl (500 ml ≈ 16.9 oz)
+  function calcBreakdown(s) {
+    const p        = s.profile || {};
+    const wKg      = p.weightKg || 72.6;
+    const wLbs     = Math.round(wKg * 2.20462);
+    const baseOz   = Math.round(wLbs / 2);
+    const caffOz   = Math.round((s.caffeineMgPerDay || 0) / 100) * 4;
+    const ageOz    = (p.age || 0) >= 55 ? 8 : 0;
+    const sexOz    = (p.sex || 'm') === 'm' ? 8 : 0;
+    const totalOz  = baseOz + caffOz + ageOz + sexOz;
+    const bottleMl = s.bottleMl || 500;
+    const bottleOz = Math.round(bottleMl / 29.5735 * 10) / 10;
+    const bottles  = Math.max(1, Math.ceil((totalOz * 29.5735) / bottleMl));
+    return { wLbs, baseOz, caffOz, ageOz, sexOz, totalOz, bottleOz, bottles, p, s };
   }
 
+  function getTarget(s) { return calcBreakdown(s).bottles; }
+
+  // ── Render ────────────────────────────────────────────
   function render() {
-    const s     = loadState();
+    const s    = loadState();
     const today = todayKey();
     const done  = (s.logs || {})[today] || 0;
     const goal  = getTarget(s);
     const pct   = goal ? Math.min(100, (done / goal) * 100) : 0;
 
-    document.getElementById('wDone').textContent     = done;
-    document.getElementById('wGoal').textContent     = goal;
-    document.getElementById('wUnitLabel').textContent = unitLabel(s);
-    document.getElementById('wBarFill').style.width  = pct + '%';
+    document.getElementById('wDone').textContent      = done;
+    document.getElementById('wGoal').textContent      = goal;
+    document.getElementById('wUnitLabel').textContent = 'bottles today';
+    document.getElementById('wBarFill').style.width   = pct + '%';
 
+    // 14-day history
     const gridEl = document.getElementById('wHistGrid');
     if (gridEl) {
       const logs = s.logs || {};
@@ -204,13 +417,54 @@ html, body {
       }
       const maxVal = Math.max(goal, ...vals.map(v => v.count), 1);
       gridEl.innerHTML = vals.map(v => {
-        const h   = Math.max(4, Math.round((v.count / maxVal) * 60));
+        const h   = Math.max(4, Math.round((v.count / maxVal) * 56));
         const cls = v.isToday ? ' today' : v.count >= goal ? ' done' : '';
         return `<div class="hist-bar${cls}" style="height:${h}px" title="${v.k}: ${v.count}/${goal}"></div>`;
       }).join('');
     }
+
+    renderWhy(s);
   }
 
+  function renderWhy(s) {
+    const b  = calcBreakdown(s);
+    const el = document.getElementById('whyRows');
+    if (!el) return;
+
+    const rows = [
+      { label: `Body weight (${b.wLbs} lbs ÷ 2)`, value: `${b.baseOz} oz`, cls: '' }
+    ];
+    if (b.caffOz > 0) {
+      rows.push({
+        label: `Caffeine (${s.caffeineMgPerDay || 0} mg/day)`,
+        value: `+${b.caffOz} oz`, cls: 'add'
+      });
+    }
+    if (b.sexOz > 0) {
+      rows.push({ label: 'Male adjustment', value: `+${b.sexOz} oz`, cls: 'add' });
+    }
+    if (b.ageOz > 0) {
+      rows.push({
+        label: `Age ${b.p.age}+ adjustment`,
+        value: `+${b.ageOz} oz`, cls: 'add'
+      });
+    }
+
+    el.innerHTML =
+      rows.map(r => `
+        <div class="why-row">
+          <span class="why-row-label">${r.label}</span>
+          <span class="why-row-value ${r.cls}">${r.value}</span>
+        </div>`).join('') +
+      `<div class="why-divider"></div>
+       <div class="why-total">
+         <span class="why-total-label">Daily target</span>
+         <span class="why-total-value">${b.totalOz} oz = ${b.bottles} bottles</span>
+       </div>
+       <div class="why-note">Based on 1 bottle = ${b.bottleOz} oz (500 ml). Adjust in po-water.html for detailed settings.</div>`;
+  }
+
+  // ── +/− buttons ───────────────────────────────────────
   document.getElementById('wPlus').addEventListener('click', () => {
     const s = loadState(), k = todayKey();
     s.logs = s.logs || {};
@@ -227,9 +481,68 @@ html, body {
     saveState(s); render();
   });
 
+  // ── "Why this amount?" accordion ──────────────────────
+  const whyCard = document.getElementById('whyCard');
+  document.getElementById('whyToggle').addEventListener('click', () => {
+    const open = whyCard.classList.toggle('open');
+    document.getElementById('whyToggle').setAttribute('aria-expanded', String(open));
+  });
+
+  // ── Settings modal ────────────────────────────────────
+  const settingsModal = document.getElementById('settingsModal');
+  let selectedSex = 'm';
+
+  function updateSexBtns() {
+    document.getElementById('sexMale').classList.toggle('active',   selectedSex === 'm');
+    document.getElementById('sexFemale').classList.toggle('active', selectedSex === 'f');
+  }
+
+  function openModal() {
+    const s = loadState(), p = s.profile || {};
+    document.getElementById('inputWeight').value   = Math.round((p.weightKg || 72.6) * 2.20462);
+    document.getElementById('inputAge').value      = p.age || 30;
+    document.getElementById('inputCaffeine').value = s.caffeineMgPerDay || 0;
+    selectedSex = p.sex || 'm';
+    updateSexBtns();
+    settingsModal.classList.add('show');
+    settingsModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('topbar-modal-open');
+  }
+
+  function closeModal() {
+    settingsModal.classList.remove('show');
+    settingsModal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('topbar-modal-open');
+  }
+
+  document.getElementById('gearBtn').addEventListener('click', openModal);
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  settingsModal.addEventListener('click', e => { if (e.target === settingsModal) closeModal(); });
+
+  document.getElementById('sexMale').addEventListener('click',   () => { selectedSex = 'm'; updateSexBtns(); });
+  document.getElementById('sexFemale').addEventListener('click', () => { selectedSex = 'f'; updateSexBtns(); });
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    const weightLbs  = Math.max(50,  parseFloat(document.getElementById('inputWeight').value)   || 160);
+    const age        = Math.max(10,  parseInt(document.getElementById('inputAge').value)         || 30);
+    const caffeineMg = Math.max(0,   parseInt(document.getElementById('inputCaffeine').value)    || 0);
+
+    const s = loadState();
+    s.profile = Object.assign(s.profile || {}, {
+      weightKg: Math.round((weightLbs / 2.20462) * 10) / 10,
+      age,
+      sex: selectedSex
+    });
+    s.caffeineMgPerDay = caffeineMg;
+    saveState(s);
+    closeModal();
+    render();
+  });
+
+  // Initial render
   render();
 
-  // ======= Cloud sync (health row, po_water_v1 key) =======
+  // ── Cloud sync (health row, po_water_v1 key) ──────────
   (function () {
     const _U = 'https://rsoobyusmktmoewlcjnq.supabase.co';
     const _K = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzb29ieXVzbWt0bW9ld2xjam5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5ODE2MDgsImV4cCI6MjA5NTU1NzYwOH0.erJXvbrZclXGVRAOp52cBD4Dzp6_BDiKyF0MupsBT1g';
