@@ -236,6 +236,25 @@ html, body {
 .save-btn:hover { background: linear-gradient(135deg, rgba(125,211,252,0.24), rgba(110,231,183,0.24)); }
 .save-btn:active { transform: scale(0.98); }
 
+/* Container size row (input + unit toggle) */
+.size-row { display: flex; gap: 8px; align-items: stretch; }
+.size-row .field-input { flex: 1; padding-right: 14px; }
+.unit-toggle {
+  display: flex; flex-shrink: 0;
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.unit-btn {
+  padding: 0 12px; background: var(--bg-input); border: none;
+  color: var(--text-tertiary); font: 700 11px/1 var(--font);
+  letter-spacing: 0.05em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent; white-space: nowrap;
+}
+.unit-btn + .unit-btn { border-left: 1px solid var(--border); }
+.unit-btn.active { background: rgba(125,211,252,0.12); color: var(--water); }
+.unit-btn:hover:not(.active) { color: var(--text-secondary); }
+
 /* Desktop: center the modal instead of bottom sheet */
 @media (min-width: 520px) {
   .modal-bg { align-items: center; }
@@ -338,6 +357,28 @@ html, body {
         </div>
       </div>
 
+      <div class="field">
+        <div class="field-label">Bottle Size</div>
+        <div class="size-row">
+          <input class="field-input" id="inputBottle" type="number" min="1" max="9999" placeholder="500" inputmode="decimal">
+          <div class="unit-toggle">
+            <button class="unit-btn" id="bottleUnitMl">ml</button>
+            <button class="unit-btn" id="bottleUnitOz">oz</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Glass Size</div>
+        <div class="size-row">
+          <input class="field-input" id="inputGlass" type="number" min="1" max="9999" placeholder="250" inputmode="decimal">
+          <div class="unit-toggle">
+            <button class="unit-btn" id="glassUnitMl">ml</button>
+            <button class="unit-btn" id="glassUnitOz">oz</button>
+          </div>
+        </div>
+      </div>
+
       <button class="save-btn" id="saveBtn">Save &amp; Recalculate</button>
     </div>
   </div>
@@ -360,7 +401,9 @@ html, body {
   function loadState() {
     try { const r = localStorage.getItem(LS_KEY); if (r) return JSON.parse(r); } catch (_e) {}
     return {
-      unit: 'bottle', bottleMl: 500, glassMl: 250, logs: {},
+      unit: 'bottle', bottleMl: 500, glassMl: 250,
+      bottleUnit: 'ml', glassUnit: 'ml',
+      logs: {},
       profile: { weightKg: 72.6, age: 30, sex: 'm' },
       caffeineMgPerDay: 0
     };
@@ -461,7 +504,7 @@ html, body {
          <span class="why-total-label">Daily target</span>
          <span class="why-total-value">${b.totalOz} oz = ${b.bottles} bottles</span>
        </div>
-       <div class="why-note">Based on 1 bottle = ${b.bottleOz} oz (500 ml). Adjust in po-water.html for detailed settings.</div>`;
+       <div class="why-note">1 bottle = ${s.bottleMl || 500} ml (${b.bottleOz} fl oz) · ${b.totalOz} oz ÷ ${b.bottleOz} oz = ${b.bottles} bottles</div>`;
   }
 
   // ── +/− buttons ───────────────────────────────────────
@@ -491,10 +534,32 @@ html, body {
   // ── Settings modal ────────────────────────────────────
   const settingsModal = document.getElementById('settingsModal');
   let selectedSex = 'm';
+  let bottleUnit  = 'ml';
+  let glassUnit   = 'ml';
+
+  const ML_PER_OZ = 29.5735;
+  function mlToOz(ml) { return Math.round(ml / ML_PER_OZ * 10) / 10; }
+  function ozToMl(oz) { return Math.round(oz * ML_PER_OZ); }
 
   function updateSexBtns() {
     document.getElementById('sexMale').classList.toggle('active',   selectedSex === 'm');
     document.getElementById('sexFemale').classList.toggle('active', selectedSex === 'f');
+  }
+  function updateBottleUnitBtns() {
+    document.getElementById('bottleUnitMl').classList.toggle('active', bottleUnit === 'ml');
+    document.getElementById('bottleUnitOz').classList.toggle('active', bottleUnit === 'oz');
+  }
+  function updateGlassUnitBtns() {
+    document.getElementById('glassUnitMl').classList.toggle('active', glassUnit === 'ml');
+    document.getElementById('glassUnitOz').classList.toggle('active', glassUnit === 'oz');
+  }
+  function switchUnit(inputId, currentUnit, newUnit, placeholders) {
+    if (newUnit === currentUnit) return currentUnit;
+    const inp = document.getElementById(inputId);
+    const val = parseFloat(inp.value) || 0;
+    inp.value       = newUnit === 'oz' ? mlToOz(val) : ozToMl(val);
+    inp.placeholder = placeholders[newUnit];
+    return newUnit;
   }
 
   function openModal() {
@@ -504,6 +569,23 @@ html, body {
     document.getElementById('inputCaffeine').value = s.caffeineMgPerDay || 0;
     selectedSex = p.sex || 'm';
     updateSexBtns();
+
+    // Bottle size
+    bottleUnit = s.bottleUnit || 'ml';
+    const bMl  = s.bottleMl || 500;
+    const bInp = document.getElementById('inputBottle');
+    bInp.value       = bottleUnit === 'ml' ? bMl : mlToOz(bMl);
+    bInp.placeholder = bottleUnit === 'ml' ? '500' : '16.9';
+    updateBottleUnitBtns();
+
+    // Glass size
+    glassUnit = s.glassUnit || 'ml';
+    const gMl  = s.glassMl || 250;
+    const gInp = document.getElementById('inputGlass');
+    gInp.value       = glassUnit === 'ml' ? gMl : mlToOz(gMl);
+    gInp.placeholder = glassUnit === 'ml' ? '250' : '8.5';
+    updateGlassUnitBtns();
+
     settingsModal.classList.add('show');
     settingsModal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('topbar-modal-open');
@@ -522,10 +604,29 @@ html, body {
   document.getElementById('sexMale').addEventListener('click',   () => { selectedSex = 'm'; updateSexBtns(); });
   document.getElementById('sexFemale').addEventListener('click', () => { selectedSex = 'f'; updateSexBtns(); });
 
+  document.getElementById('bottleUnitMl').addEventListener('click', () => {
+    bottleUnit = switchUnit('inputBottle', bottleUnit, 'ml', { ml: '500',  oz: '16.9' });
+    updateBottleUnitBtns();
+  });
+  document.getElementById('bottleUnitOz').addEventListener('click', () => {
+    bottleUnit = switchUnit('inputBottle', bottleUnit, 'oz', { ml: '500',  oz: '16.9' });
+    updateBottleUnitBtns();
+  });
+  document.getElementById('glassUnitMl').addEventListener('click', () => {
+    glassUnit = switchUnit('inputGlass', glassUnit, 'ml', { ml: '250', oz: '8.5' });
+    updateGlassUnitBtns();
+  });
+  document.getElementById('glassUnitOz').addEventListener('click', () => {
+    glassUnit = switchUnit('inputGlass', glassUnit, 'oz', { ml: '250', oz: '8.5' });
+    updateGlassUnitBtns();
+  });
+
   document.getElementById('saveBtn').addEventListener('click', () => {
     const weightLbs  = Math.max(50,  parseFloat(document.getElementById('inputWeight').value)   || 160);
     const age        = Math.max(10,  parseInt(document.getElementById('inputAge').value)         || 30);
     const caffeineMg = Math.max(0,   parseInt(document.getElementById('inputCaffeine').value)    || 0);
+    const bottleRaw  = parseFloat(document.getElementById('inputBottle').value) || (bottleUnit === 'ml' ? 500 : 16.9);
+    const glassRaw   = parseFloat(document.getElementById('inputGlass').value)  || (glassUnit  === 'ml' ? 250 : 8.5);
 
     const s = loadState();
     s.profile = Object.assign(s.profile || {}, {
@@ -534,6 +635,10 @@ html, body {
       sex: selectedSex
     });
     s.caffeineMgPerDay = caffeineMg;
+    s.bottleMl   = Math.max(50, bottleUnit === 'ml' ? Math.round(bottleRaw) : ozToMl(bottleRaw));
+    s.glassMl    = Math.max(30, glassUnit  === 'ml' ? Math.round(glassRaw)  : ozToMl(glassRaw));
+    s.bottleUnit = bottleUnit;
+    s.glassUnit  = glassUnit;
     saveState(s);
     closeModal();
     render();
