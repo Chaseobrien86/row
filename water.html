@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050506">
+<title>Water</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="topbar.js" defer></script>
+<style>
+:root {
+  --bg: #050506;
+  --bg-card: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.06);
+  --text-primary: #FAFAFA;
+  --text-secondary: #B8B6B0;
+  --text-tertiary: #76746E;
+  --text-quaternary: #4D4B47;
+  --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --water: #7DD3FC;
+  --water-2: #6EE7B7;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg);
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 15px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.page { max-width: 480px; margin: 0 auto; padding: 28px 16px 24px; }
+
+.page-eyebrow {
+  font: 700 10px/1 var(--font); letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-tertiary); margin-bottom: 5px;
+}
+.page-title {
+  font: 700 30px/1.1 var(--font); color: var(--text-primary); margin-bottom: 28px;
+}
+
+.water-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 28px 24px 24px;
+  margin-bottom: 12px;
+}
+
+.today-label {
+  font: 700 10px/1 var(--font); letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-tertiary); margin-bottom: 22px; text-align: center;
+}
+
+.water-count-row {
+  display: flex; align-items: center; gap: 24px;
+  justify-content: center; margin-bottom: 8px;
+}
+.water-btn {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: rgba(125, 211, 252, 0.10);
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  color: var(--water); font-size: 28px; font-weight: 300; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, transform 0.1s; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.water-btn:hover  { background: rgba(125, 211, 252, 0.18); }
+.water-btn:active { transform: scale(0.88); }
+.water-btn-plus   { background: rgba(125, 211, 252, 0.17); }
+
+.water-count-display {
+  text-align: center; display: flex; align-items: baseline; gap: 6px;
+}
+.water-num {
+  font: 700 68px/1 var(--font-mono);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.water-sep  { font: 300 30px/1 var(--font-mono); color: var(--text-quaternary); }
+.water-goal { font-size: 38px !important; color: var(--text-tertiary) !important; }
+
+.water-unit-label {
+  text-align: center; font-size: 13px; color: var(--text-tertiary); margin-bottom: 22px;
+}
+
+.water-bar-track {
+  height: 6px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden;
+}
+.water-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--water), var(--water-2));
+  border-radius: 99px; transition: width 0.35s ease;
+}
+
+/* 14-day history */
+.hist-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 20px 20px 18px;
+}
+.hist-label {
+  font: 700 10px/1 var(--font); letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-tertiary); margin-bottom: 12px;
+}
+.hist-grid {
+  display: grid; grid-template-columns: repeat(14, 1fr); gap: 3px;
+  align-items: end; height: 64px;
+}
+.hist-bar {
+  background: rgba(125, 211, 252, 0.20); border-radius: 3px 3px 0 0; min-height: 4px;
+  transition: height 0.2s ease;
+}
+.hist-bar.today { background: rgba(125, 211, 252, 0.70); }
+.hist-bar.done  { background: rgba(110, 231, 183, 0.55); }
+</style>
+</head>
+<body>
+
+<main class="page">
+  <div class="page-eyebrow">Today</div>
+  <div class="page-title">Water</div>
+
+  <div class="water-card">
+    <div class="today-label">Intake</div>
+    <div class="water-count-row">
+      <button class="water-btn" id="wMinus" aria-label="Remove one drink">−</button>
+      <div class="water-count-display">
+        <span class="water-num" id="wDone">0</span>
+        <span class="water-sep">/</span>
+        <span class="water-num water-goal" id="wGoal">8</span>
+      </div>
+      <button class="water-btn water-btn-plus" id="wPlus" aria-label="Add one drink">+</button>
+    </div>
+    <div class="water-unit-label" id="wUnitLabel">bottles today</div>
+    <div class="water-bar-track">
+      <div class="water-bar-fill" id="wBarFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="hist-card">
+    <div class="hist-label">Last 14 days</div>
+    <div class="hist-grid" id="wHistGrid"></div>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const LS_KEY = 'po_water_v1';
+
+  function dateKey(d) {
+    return d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+  }
+  function todayKey() { return dateKey(new Date()); }
+
+  function loadState() {
+    try { const r = localStorage.getItem(LS_KEY); if (r) return JSON.parse(r); } catch (_e) {}
+    return { unit: 'bottle', bottleMl: 500, glassMl: 250, logs: {} };
+  }
+  function saveState(s) {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(s)); } catch (_e) {}
+  }
+  function getTarget(s) {
+    const p = s.profile || {};
+    const wKg = s.weightUnit === 'lb' ? ((p.weightKg || 75) / 2.20462) : (p.weightKg || 75);
+    const base    = wKg * 35;
+    const exercise = ((p.activityHrsPerWeek || 0) / 7) * 500;
+    let vol;
+    if      (s.unit === 'glass') vol = s.glassMl  || 250;
+    else if (s.unit === 'oz')    vol = 30;
+    else if (s.unit === 'ml')    vol = 1;
+    else                         vol = s.bottleMl || 500;
+    return Math.max(1, Math.ceil((base + exercise) / vol));
+  }
+  function unitLabel(s) {
+    if (s.unit === 'glass') return 'glasses today';
+    if (s.unit === 'oz')    return 'oz servings today';
+    if (s.unit === 'ml')    return 'ml today';
+    return 'bottles today';
+  }
+
+  function render() {
+    const s     = loadState();
+    const today = todayKey();
+    const done  = (s.logs || {})[today] || 0;
+    const goal  = getTarget(s);
+    const pct   = goal ? Math.min(100, (done / goal) * 100) : 0;
+
+    document.getElementById('wDone').textContent     = done;
+    document.getElementById('wGoal').textContent     = goal;
+    document.getElementById('wUnitLabel').textContent = unitLabel(s);
+    document.getElementById('wBarFill').style.width  = pct + '%';
+
+    const gridEl = document.getElementById('wHistGrid');
+    if (gridEl) {
+      const logs = s.logs || {};
+      const vals = [];
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        vals.push({ k: dateKey(d), count: logs[dateKey(d)] || 0, isToday: i === 0 });
+      }
+      const maxVal = Math.max(goal, ...vals.map(v => v.count), 1);
+      gridEl.innerHTML = vals.map(v => {
+        const h   = Math.max(4, Math.round((v.count / maxVal) * 60));
+        const cls = v.isToday ? ' today' : v.count >= goal ? ' done' : '';
+        return `<div class="hist-bar${cls}" style="height:${h}px" title="${v.k}: ${v.count}/${goal}"></div>`;
+      }).join('');
+    }
+  }
+
+  document.getElementById('wPlus').addEventListener('click', () => {
+    const s = loadState(), k = todayKey();
+    s.logs = s.logs || {};
+    s.logs[k] = (s.logs[k] || 0) + 1;
+    saveState(s); render();
+  });
+  document.getElementById('wMinus').addEventListener('click', () => {
+    const s = loadState(), k = todayKey();
+    s.logs = s.logs || {};
+    if ((s.logs[k] || 0) > 0) {
+      s.logs[k]--;
+      if (s.logs[k] === 0) delete s.logs[k];
+    }
+    saveState(s); render();
+  });
+
+  render();
+
+  // ======= Cloud sync (health row, po_water_v1 key) =======
+  (function () {
+    const _U = 'https://rsoobyusmktmoewlcjnq.supabase.co';
+    const _K = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzb29ieXVzbWt0bW9ld2xjam5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5ODE2MDgsImV4cCI6MjA5NTU1NzYwOH0.erJXvbrZclXGVRAOp52cBD4Dzp6_BDiKyF0MupsBT1g';
+    const _R  = 'health';
+    let _supa = null, _timer = null, _suppress = false, _lastJson = null, _fullRow = {};
+
+    function _isOurs(k)  { return k === LS_KEY; }
+    function _collect()  {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return {};
+      try { return { [LS_KEY]: JSON.parse(raw) }; } catch { return {}; }
+    }
+    function _extract(r) { return (r && r[LS_KEY]) ? { [LS_KEY]: r[LS_KEY] } : {}; }
+    function _apply(r) {
+      if (!r || !r[LS_KEY]) return false;
+      const inc = JSON.stringify(r[LS_KEY]);
+      if (localStorage.getItem(LS_KEY) === inc) return false;
+      _orig(LS_KEY, inc); return true;
+    }
+    function _rerender() { try { render(); } catch (_e) {} }
+
+    async function _push() {
+      if (!_supa) return;
+      const local = _collect(), json = JSON.stringify(local);
+      if (json === _lastJson) return;
+      try {
+        const { data: rd } = await _supa.from('app_state').select('data').eq('key', _R).maybeSingle();
+        _fullRow = (rd && rd.data) || {};
+        const { error } = await _supa.from('app_state').upsert(
+          { key: _R, data: Object.assign({}, _fullRow, local), updated_at: new Date().toISOString() },
+          { onConflict: 'key' }
+        );
+        if (!error) _lastJson = json;
+      } catch (_e) {}
+    }
+    function _schedule() {
+      if (_suppress) return;
+      clearTimeout(_timer);
+      _timer = setTimeout(_push, 300);
+    }
+    function _flush() {
+      if (!_supa) return;
+      const local = _collect();
+      if (JSON.stringify(local) === _lastJson) return;
+      try {
+        fetch(_U + '/rest/v1/app_state?on_conflict=key', {
+          method: 'POST',
+          headers: { apikey: _K, Authorization: 'Bearer ' + _K, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' },
+          body: JSON.stringify({ key: _R, data: Object.assign({}, _fullRow, local), updated_at: new Date().toISOString() }),
+          keepalive: true
+        }).catch(() => {});
+      } catch (_e) {}
+    }
+
+    const _orig    = localStorage.setItem.bind(localStorage);
+    const _origDel = localStorage.removeItem.bind(localStorage);
+    localStorage.setItem    = function (k, v) { _orig(k, v);    if (!_suppress && _isOurs(k)) _schedule(); };
+    localStorage.removeItem = function (k)    { _origDel(k);    if (!_suppress && _isOurs(k)) _schedule(); };
+    window.addEventListener('pagehide', _flush);
+    window.addEventListener('beforeunload', _flush);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) _flush(); });
+
+    (async function () {
+      if (!window.supabase) return;
+      _supa = window.supabase.createClient(_U, _K);
+      try {
+        const { data: fd, error: fe } = await _supa.from('app_state').select('data').eq('key', _R).maybeSingle();
+        if (!fe && fd && fd.data) {
+          _fullRow = fd.data;
+          _suppress = true;
+          try { _apply(fd.data); } finally { _suppress = false; }
+          _lastJson = JSON.stringify(_collect());
+          _rerender();
+        } else if (Object.keys(_collect()).length > 0) {
+          _schedule();
+        }
+      } catch (_e) {}
+      _supa.channel('water_page_ch')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'app_state', filter: 'key=eq.' + _R },
+          payload => {
+            if (!payload.new || !payload.new.data) return;
+            _fullRow = payload.new.data;
+            const oursJson = JSON.stringify(_extract(payload.new.data));
+            if (oursJson === _lastJson) return;
+            _lastJson = oursJson;
+            _suppress = true;
+            try { _apply(payload.new.data); } finally { _suppress = false; }
+            _rerender();
+          })
+        .subscribe();
+    })();
+  })();
+})();
+</script>
+</body>
+</html>

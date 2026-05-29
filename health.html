@@ -450,73 +450,11 @@ main {
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.15); }
 
-/* ---- Health tab navigation ---- */
-.htabs {
-  position: sticky; top: 0; z-index: 30;
-  display: flex;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
-  padding: 0 16px;
-}
-.htab {
-  padding: 12px 20px;
-  font: 700 11px/1 var(--font); letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--text-tertiary); background: none; border: none; cursor: pointer;
-  border-bottom: 2px solid transparent; margin-bottom: -1px;
-  transition: color 0.15s, border-color 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-.htab.active { color: var(--text-primary); border-bottom-color: var(--accent); }
-.htab:hover:not(.active) { color: var(--text-secondary); }
-
-/* ---- Water section ---- */
-.water-section { padding: 16px 16px 48px; }
-.water-card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 16px; padding: 24px 20px;
-}
-.water-eyebrow {
-  font: 700 10px/1 var(--font); letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--text-tertiary); margin-bottom: 20px;
-}
-.water-count-row {
-  display: flex; align-items: center; gap: 20px;
-  justify-content: center; margin-bottom: 6px;
-}
-.water-btn {
-  width: 48px; height: 48px; border-radius: 50%;
-  background: rgba(125,211,252,0.1); border: 1px solid rgba(125,211,252,0.2);
-  color: #7DD3FC; font-size: 24px; font-weight: 300; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s, transform 0.1s; flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent;
-}
-.water-btn:hover { background: rgba(125,211,252,0.18); }
-.water-btn:active { transform: scale(0.91); }
-.water-btn-plus { background: rgba(125,211,252,0.16); }
-.water-count-display { text-align: center; display: flex; align-items: baseline; gap: 4px; }
-.water-num { font: 700 52px/1 var(--font-mono); color: var(--text-primary); font-variant-numeric: tabular-nums; }
-.water-sep { font: 300 24px/1 var(--font-mono); color: var(--text-quaternary); }
-.water-goal { font-size: 28px !important; color: var(--text-tertiary) !important; }
-.water-unit-label { text-align: center; font-size: 12px; color: var(--text-tertiary); margin-bottom: 16px; }
-.water-bar-wrap { margin-bottom: 28px; }
-.water-bar-track { height: 5px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden; }
-.water-bar-fill { height: 100%; background: linear-gradient(90deg,#7DD3FC,#6EE7B7); border-radius: 99px; transition: width 0.3s; }
-.water-hist-label { font: 700 10px/1 var(--font); letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 10px; }
-.water-hist-grid { display: grid; grid-template-columns: repeat(14,1fr); gap: 3px; align-items: end; height: 52px; }
-.water-hist-bar { background: rgba(125,211,252,0.2); border-radius: 3px 3px 0 0; min-height: 4px; }
-.water-hist-bar.today { background: rgba(125,211,252,0.65); }
-.water-hist-bar.done { background: rgba(110,231,183,0.5); }
 </style>
 </head>
 <body>
 
-<nav class="htabs" id="htabs">
-  <button class="htab active" data-tab="stack">Stack</button>
-  <button class="htab" data-tab="water">Water</button>
-</nav>
-
-<main id="tabStack">
+<main>
   <div class="section-title">Daily Stack</div>
 
   <div class="stack-card">
@@ -561,27 +499,6 @@ main {
 
   <div class="attribution">// editable template · all data stays in your browser</div>
 </main>
-
-<section class="water-section" id="tabWater" hidden>
-  <div class="water-card">
-    <div class="water-eyebrow">Water Today</div>
-    <div class="water-count-row">
-      <button class="water-btn" id="wMinus" aria-label="Remove one drink">−</button>
-      <div class="water-count-display">
-        <span class="water-num" id="wDone">0</span>
-        <span class="water-sep">/</span>
-        <span class="water-num water-goal" id="wGoal">8</span>
-      </div>
-      <button class="water-btn water-btn-plus" id="wPlus" aria-label="Add one drink">+</button>
-    </div>
-    <div class="water-unit-label" id="wUnitLabel">bottles today</div>
-    <div class="water-bar-wrap">
-      <div class="water-bar-track"><div class="water-bar-fill" id="wBarFill" style="width:0%"></div></div>
-    </div>
-    <div class="water-hist-label">Last 14 days</div>
-    <div class="water-hist-grid" id="wHistGrid"></div>
-  </div>
-</section>
 
 <script>
 (() => {
@@ -1097,103 +1014,6 @@ main {
   render();
   startTicker();
 
-  // ---- Water tracker ----
-  function waterDateKey() {
-    const d = new Date();
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  }
-  function waterLoad() {
-    try { const r = localStorage.getItem('po_water_v1'); if (r) return JSON.parse(r); } catch (_e) {}
-    return { unit: 'bottle', bottleMl: 500, logs: {} };
-  }
-  function waterSave(ws) {
-    try { localStorage.setItem('po_water_v1', JSON.stringify(ws)); } catch (_e) {}
-  }
-  function waterTarget(ws) {
-    const p = ws.profile || {};
-    const wKg = ws.weightUnit === 'lb' ? ((p.weightKg || 75) / 2.20462) : (p.weightKg || 75);
-    const base = wKg * 35;
-    const exercise = ((p.activityHrsPerWeek || 0) / 7) * 500;
-    let vol;
-    if (ws.unit === 'glass') vol = ws.glassMl || 250;
-    else if (ws.unit === 'oz') vol = 30;
-    else if (ws.unit === 'ml') vol = 1;
-    else vol = ws.bottleMl || 500;
-    return Math.max(1, Math.ceil((base + exercise) / vol));
-  }
-  function waterRender() {
-    const ws = waterLoad();
-    const today = waterDateKey();
-    const done = (ws.logs || {})[today] || 0;
-    const goal = waterTarget(ws);
-    const unit = ws.unit === 'glass' ? 'glasses' : ws.unit === 'oz' ? 'oz servings' : ws.unit === 'ml' ? 'ml' : 'bottles';
-    const doneEl = document.getElementById('wDone');
-    if (!doneEl) return;
-    doneEl.textContent = done;
-    const goalEl = document.getElementById('wGoal');
-    if (goalEl) goalEl.textContent = goal;
-    const unitEl = document.getElementById('wUnitLabel');
-    if (unitEl) unitEl.textContent = unit + ' today';
-    const barEl = document.getElementById('wBarFill');
-    if (barEl) barEl.style.width = Math.min(100, goal ? (done / goal) * 100 : 0) + '%';
-    const gridEl = document.getElementById('wHistGrid');
-    if (gridEl) {
-      const logs = ws.logs || {};
-      const vals = [];
-      for (let i = 13; i >= 0; i--) {
-        const d = new Date(); d.setDate(d.getDate() - i);
-        const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-        vals.push({ k, count: logs[k] || 0, isToday: i === 0 });
-      }
-      const maxVal = Math.max(goal, ...vals.map(v => v.count), 1);
-      gridEl.innerHTML = vals.map(v => {
-        const h = Math.max(4, Math.round((v.count / maxVal) * 48));
-        const cls = v.isToday ? ' today' : v.count >= goal ? ' done' : '';
-        return `<div class="water-hist-bar${cls}" style="height:${h}px" title="${v.k}: ${v.count}/${goal}"></div>`;
-      }).join('');
-    }
-  }
-  const _wPlus = document.getElementById('wPlus');
-  const _wMinus = document.getElementById('wMinus');
-  if (_wPlus) _wPlus.addEventListener('click', () => {
-    const ws = waterLoad();
-    const today = waterDateKey();
-    ws.logs = ws.logs || {};
-    ws.logs[today] = (ws.logs[today] || 0) + 1;
-    waterSave(ws);
-    waterRender();
-  });
-  if (_wMinus) _wMinus.addEventListener('click', () => {
-    const ws = waterLoad();
-    const today = waterDateKey();
-    ws.logs = ws.logs || {};
-    if ((ws.logs[today] || 0) > 0) {
-      ws.logs[today]--;
-      if (ws.logs[today] === 0) delete ws.logs[today];
-    }
-    waterSave(ws);
-    waterRender();
-  });
-
-  // ---- Tab navigation ----
-  (function () {
-    const tabStack = document.getElementById('tabStack');
-    const tabWater = document.getElementById('tabWater');
-    const btns = document.querySelectorAll('.htab');
-    function showTab(name) {
-      if (tabStack) tabStack.hidden = (name !== 'stack');
-      if (tabWater) tabWater.hidden = (name !== 'water');
-      btns.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
-      if (name === 'water') waterRender();
-    }
-    btns.forEach(b => b.addEventListener('click', () => {
-      history.replaceState(null, '', '#' + b.dataset.tab);
-      showTab(b.dataset.tab);
-    }));
-    const hash = location.hash.replace('#', '');
-    showTab(['stack', 'water'].includes(hash) ? hash : 'stack');
-  })();
-
   // ======= Cloud sync =======
   (function () {
     const _U = 'https://rsoobyusmktmoewlcjnq.supabase.co';
@@ -1202,7 +1022,7 @@ main {
     let _supa = null, _timer = null, _suppress = false, _lastJson = null, _fullRow = {};
 
     function _isOurs(k) {
-      return k === 'stack:items' || k === 'stack:version' || k === 'stack:low' || k.startsWith('stack:taken:') || k === 'po_water_v1';
+      return k === 'stack:items' || k === 'stack:version' || k === 'stack:low' || k.startsWith('stack:taken:');
     }
     function _collect() {
       const out = {};
@@ -1214,8 +1034,6 @@ main {
         const k = localStorage.key(i);
         if (k && k.startsWith('stack:taken:')) try { out[k] = JSON.parse(localStorage.getItem(k)); } catch {}
       }
-      const wv = localStorage.getItem('po_water_v1');
-      if (wv != null) try { out['po_water_v1'] = JSON.parse(wv); } catch {}
       return out;
     }
     function _extract(remote) {
@@ -1227,7 +1045,6 @@ main {
       for (const k of Object.keys(remote)) {
         if (k.startsWith('stack:taken:')) out[k] = remote[k];
       }
-      if ('po_water_v1' in remote) out['po_water_v1'] = remote['po_water_v1'];
       return out;
     }
     function _apply(remote) {
@@ -1245,17 +1062,9 @@ main {
           if (localStorage.getItem(k) !== inc) { _orig(k, inc); changed = true; }
         }
       }
-      if ('po_water_v1' in remote) {
-        const inc = JSON.stringify(remote['po_water_v1']);
-        if (localStorage.getItem('po_water_v1') !== inc) { _orig('po_water_v1', inc); changed = true; }
-      }
       return changed;
     }
-    function _rerender() {
-      try { render(); } catch (_e) {}
-      const wTab = document.getElementById('tabWater');
-      if (wTab && !wTab.hidden) try { waterRender(); } catch (_e) {}
-    }
+    function _rerender() { try { render(); } catch (_e) {} }
 
     async function _push() {
       if (!_supa) return;
