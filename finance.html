@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0a0a0b">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Finances</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="topbar.js" defer></script>
 <style>
 :root {
@@ -3372,6 +3373,123 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
   safeRenderTicker();
   setInterval(safeRenderTicker, 1500);
+
+  // ======= Cloud sync =======
+  (function () {
+    const _U = 'https://rsoobyusmktmoewlcjnq.supabase.co';
+    const _K = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzb29ieXVzbWt0bW9ld2xjam5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5ODE2MDgsImV4cCI6MjA5NTU1NzYwOH0.erJXvbrZclXGVRAOp52cBD4Dzp6_BDiKyF0MupsBT1g';
+    const _R = 'finance';
+    let _supa = null, _timer = null, _suppress = false, _lastJson = null, _fullRow = {};
+
+    function _isOurs(k) {
+      return typeof k === 'string' && (k.startsWith('nw:') || k === 'subs' || k === 'nw_currency');
+    }
+    function _collect() {
+      const out = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && _isOurs(k)) try { out[k] = JSON.parse(localStorage.getItem(k)); } catch {}
+      }
+      return out;
+    }
+    function _extract(remote) {
+      if (!remote) return {};
+      const out = {};
+      for (const k of Object.keys(remote)) {
+        if (_isOurs(k)) out[k] = remote[k];
+      }
+      return out;
+    }
+    function _apply(remote) {
+      if (!remote) return false;
+      let changed = false;
+      for (const k of Object.keys(remote)) {
+        if (_isOurs(k)) {
+          const inc = JSON.stringify(remote[k]);
+          if (localStorage.getItem(k) !== inc) { _orig(k, inc); changed = true; }
+        }
+      }
+      return changed;
+    }
+    function _rerender() {
+      try { renderAllNetWorth(); } catch (_e) {}
+      if (typeof renderSubs === 'function') try { renderSubs(); } catch (_e) {}
+      try { safeRenderTicker(); } catch (_e) {}
+    }
+
+    async function _push() {
+      if (!_supa) return;
+      const local = _collect();
+      const json = JSON.stringify(local);
+      if (json === _lastJson) return;
+      try {
+        const { data: rd } = await _supa.from('app_state').select('data').eq('key', _R).maybeSingle();
+        _fullRow = (rd && rd.data) || {};
+        const merged = Object.assign({}, _fullRow, local);
+        const { error } = await _supa.from('app_state').upsert(
+          { key: _R, data: merged, updated_at: new Date().toISOString() },
+          { onConflict: 'key' }
+        );
+        if (!error) _lastJson = json;
+      } catch (_e) {}
+    }
+    function _schedule() {
+      if (_suppress) return;
+      clearTimeout(_timer);
+      _timer = setTimeout(_push, 300);
+    }
+    function _flush() {
+      if (!_supa) return;
+      const local = _collect();
+      if (JSON.stringify(local) === _lastJson) return;
+      try {
+        fetch(_U + '/rest/v1/app_state?on_conflict=key', {
+          method: 'POST',
+          headers: { apikey: _K, Authorization: 'Bearer ' + _K, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' },
+          body: JSON.stringify({ key: _R, data: Object.assign({}, _fullRow, local), updated_at: new Date().toISOString() }),
+          keepalive: true
+        }).catch(() => {});
+      } catch (_e) {}
+    }
+
+    const _orig = localStorage.setItem.bind(localStorage);
+    const _origDel = localStorage.removeItem.bind(localStorage);
+    localStorage.setItem = function (k, v) { _orig(k, v); if (!_suppress && _isOurs(k)) _schedule(); };
+    localStorage.removeItem = function (k) { _origDel(k); if (!_suppress && _isOurs(k)) _schedule(); };
+    window.addEventListener('pagehide', _flush);
+    window.addEventListener('beforeunload', _flush);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) _flush(); });
+
+    (async function () {
+      if (!window.supabase) return;
+      _supa = window.supabase.createClient(_U, _K);
+      try {
+        const { data: fd, error: fe } = await _supa.from('app_state').select('data').eq('key', _R).maybeSingle();
+        if (!fe && fd && fd.data) {
+          _fullRow = fd.data;
+          _suppress = true;
+          try { _apply(fd.data); } finally { _suppress = false; }
+          _lastJson = JSON.stringify(_collect());
+          _rerender();
+        } else if (Object.keys(_collect()).length > 0) {
+          _schedule();
+        }
+      } catch (_e) {}
+      _supa.channel('finance_sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'app_state', filter: 'key=eq.' + _R },
+          payload => {
+            if (!payload.new || !payload.new.data) return;
+            _fullRow = payload.new.data;
+            const oursJson = JSON.stringify(_extract(payload.new.data));
+            if (oursJson === _lastJson) return;
+            _lastJson = oursJson;
+            _suppress = true;
+            try { _apply(payload.new.data); } finally { _suppress = false; }
+            _rerender();
+          })
+        .subscribe();
+    })();
+  })();
 
 })();
 </script>
