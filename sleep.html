@@ -843,9 +843,23 @@ async function supaInit() {
   supa = window.supabase.createClient(SB_URL, SB_KEY);
   try {
     var res = await supa.from('app_state').select('data').eq('key', SB_ROW).maybeSingle();
-    if (!res.error && res.data && Array.isArray(res.data.data)) {
-      mergeLogs(res.data.data);
-      logsSave();
+    if (!res.error && res.data && res.data.data != null) {
+      var raw = res.data.data;
+
+      // Apple Shortcuts writes a single object; the app writes an array.
+      // Normalise to an array in either case.
+      var wasObject = !Array.isArray(raw);
+      var incoming  = wasObject ? [raw] : raw;
+      var normalised = incoming.map(normalizeEntry).filter(Boolean);
+
+      if (normalised.length > 0) {
+        mergeLogs(normalised);
+        logsSave();
+        // Shortcuts just overwrote the array with a single object.
+        // Write the full merged array straight back so history isn't
+        // erased the next time Shortcuts runs before the page opens.
+        if (wasObject) await supaSave();
+      }
     }
   } catch(_){}
 }
@@ -858,14 +872,43 @@ async function supaSave() {
     );
   } catch(_){}
 }
+
+// Ensure every entry has all required fields and a stable id.
+// Apple Shortcuts entries arrive without an id or created_at, so we
+// generate a deterministic id from date+bedtime so duplicates merge
+// correctly rather than accumulating.
+function normalizeEntry(entry) {
+  if (!entry || !entry.date) return null;
+  var id = entry.id ||
+    ('aw-' + entry.date + '-' + String(entry.bedtime || '00:00').replace(':', ''));
+  return {
+    id:                 id,
+    date:               entry.date,
+    bedtime:            entry.bedtime  || '23:00',
+    wake_time:          entry.wake_time || '07:00',
+    duration_hours:     entry.duration_hours  != null ? entry.duration_hours
+                          : calcDuration(entry.bedtime || '23:00', entry.wake_time || '07:00'),
+    quality_rating:     entry.quality_rating  != null ? entry.quality_rating  : 5,
+    notes:              entry.notes           || '',
+    data_source:        entry.data_source     || 'manual',
+    deep_sleep_minutes: entry.deep_sleep_minutes  != null ? entry.deep_sleep_minutes  : null,
+    rem_sleep_minutes:  entry.rem_sleep_minutes   != null ? entry.rem_sleep_minutes   : null,
+    core_sleep_minutes: entry.core_sleep_minutes  != null ? entry.core_sleep_minutes  : null,
+    created_at:         entry.created_at || new Date().toISOString()
+  };
+}
+
 function mergeLogs(remote) {
-  // Build map keyed by id; remote wins on conflict (newer updated_at)
+  // Keyed by id; newer created_at wins on conflict.
   var map = {};
   logs.forEach(function(l) { map[l.id] = l; });
   remote.forEach(function(l) {
-    if (!map[l.id] || l.created_at > map[l.id].created_at) map[l.id] = l;
+    if (!l || !l.id) return;
+    if (!map[l.id] || (l.created_at || '') >= (map[l.id].created_at || '')) {
+      map[l.id] = l;
+    }
   });
-  logs = Object.values(map).sort(function(a,b){ return a.date.localeCompare(b.date); });
+  logs = Object.values(map).sort(function(a, b) { return a.date.localeCompare(b.date); });
 }
 
 /* ── Log a new sleep entry ── */
