@@ -344,22 +344,7 @@ body::after {
 .c-neg { color: var(--danger)  !important; }
 .c-neu { color: var(--text-tertiary) !important; }
 
-/* ── Stale pill ── */
-.stale-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: rgba(242,192,99,0.10);
-  border: 1px solid rgba(242,192,99,0.22);
-  color: var(--warning);
-  font-size: 9px;
-  font-family: var(--font-mono);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  vertical-align: middle;
-}
+
 .ndash { color: var(--text-quaternary); font-family: var(--font-mono); }
 
 /* ════════════════════════════════════════
@@ -1260,13 +1245,10 @@ function renderPositions() {
     var val   = q ? q.price * p.shares : null;
     var gl    = val != null ? val - cost : null;
     var glPct = gl != null && cost > 0 ? (gl / cost) * 100 : null;
-    var isStale = q && (Date.now() - q.fetchedAt) > CACHE_MS;
-
     var perfCls = gl != null ? (gl > 0 ? ' perf-pos' : gl < 0 ? ' perf-neg' : '') : '';
     var card = document.createElement('div');
     card.className = 'pos-card' + perfCls;
 
-    var stalePill  = isStale ? ' <span class="stale-pill">stale</span>' : '';
     var priceHTML  = q ? esc(fmt$(q.price)) : '<span class="ndash">—</span>';
     var dayHTML    = q
       ? '<span class="' + cCls(q.change) + '">'
@@ -1284,7 +1266,7 @@ function renderPositions() {
     card.innerHTML =
         '<div class="pos-top">'
       +   '<div>'
-      +     '<div class="pos-symbol">' + esc(p.symbol) + stalePill + '</div>'
+      +     '<div class="pos-symbol">' + esc(p.symbol) + '</div>'
       +     '<div class="pos-name">' + esc(p.name) + '</div>'
       +   '</div>'
       +   '<div class="pos-price-col">'
