@@ -1262,6 +1262,121 @@ img, video, canvas, svg { max-width: 100%; }
 }
 
 .hidden { display: none !important; }
+
+/* ===== GYM ATTENDANCE CALENDAR ===== */
+.gc-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 14px 12px 14px;
+}
+.gc-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.gc-nav-btn {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.45); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent; line-height: 1;
+}
+.gc-nav-btn:hover { background: rgba(255,255,255,0.10); color: #fff; }
+.gc-nav-btn:active { transform: scale(0.91); }
+.gc-nav-btn:disabled { opacity: 0.22; cursor: default; transform: none; }
+.gc-month-title {
+  font: 700 14px/1 -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  letter-spacing: 0.02em; color: #FAFAFA;
+}
+.gc-pill-strip {
+  display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none;
+  margin-bottom: 12px; padding-bottom: 1px;
+}
+.gc-pill-strip::-webkit-scrollbar { display: none; }
+.gc-pill {
+  flex-shrink: 0; padding: 4px 9px;
+  border-radius: 99px; border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.35);
+  font: 600 10px/1 -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  letter-spacing: 0.05em; cursor: pointer;
+  transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+}
+.gc-pill.gc-active {
+  background: rgba(110,231,183,0.14); border-color: rgba(110,231,183,0.32);
+  color: #6EE7B7;
+}
+.gc-dow {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  margin-bottom: 4px;
+}
+.gc-dow-cell {
+  text-align: center;
+  font: 600 9px/1 -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  letter-spacing: 0.06em; color: rgba(255,255,255,0.2); padding: 2px 0;
+}
+.gc-grid {
+  display: grid; grid-template-columns: repeat(7,1fr); gap: 3px;
+}
+.gc-cell {
+  display: flex; flex-direction: column; align-items: center;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  padding: 1px 0;
+}
+.gc-cell.gc-spacer { pointer-events: none; }
+.gc-dot {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  border: 1.5px solid transparent;
+  display: flex; align-items: center; justify-content: center;
+  font: 600 10px/1 ui-monospace, "SF Mono", Menlo, monospace;
+  color: rgba(255,255,255,0.3);
+  transition: background 0.16s, border-color 0.16s, color 0.16s, transform 0.12s;
+}
+.gc-cell:active .gc-dot { transform: scale(0.86); }
+.gc-dot.gc-gym {
+  background: rgba(110,231,183,0.18); border-color: rgba(110,231,183,0.38);
+  color: #6EE7B7;
+}
+.gc-dot.gc-rest {
+  background: rgba(255,138,138,0.18); border-color: rgba(255,138,138,0.38);
+  color: #FF8A8A;
+}
+.gc-dot.gc-today-ring { border-color: rgba(255,255,255,0.28); }
+.gc-stats-row {
+  display: flex; gap: 8px; margin-top: 12px;
+}
+.gc-stat {
+  flex: 1;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px; padding: 8px 10px;
+}
+.gc-stat-num {
+  font: 700 18px/1 ui-monospace, "SF Mono", Menlo, monospace;
+  color: #FAFAFA; margin-bottom: 3px;
+}
+.gc-stat-num.gc-green { color: #6EE7B7; }
+.gc-stat-lbl {
+  font: 600 9px/1 -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
+}
+.gc-legend {
+  display: flex; gap: 12px; margin-top: 10px;
+  padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05);
+}
+.gc-legend-item {
+  display: flex; align-items: center; gap: 5px;
+  font: 500 11px/1 -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  color: rgba(255,255,255,0.32);
+}
+.gc-legend-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.gc-legend-dot.gc-gym  { background: #6EE7B7; }
+.gc-legend-dot.gc-rest { background: #FF8A8A; }
+.gc-legend-dot.gc-none { background: rgba(255,255,255,0.15); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1430,6 +1545,36 @@ img, video, canvas, svg { max-width: 100%; }
       </div>
     </div>
 
+  </div>
+
+  <!-- ATTENDANCE CALENDAR -->
+  <div class="wt-section">
+    <div class="wt-divider"><span>ATTENDANCE 2026</span></div>
+    <div class="gc-card">
+      <div class="gc-nav">
+        <button class="gc-nav-btn" id="gcPrev" aria-label="Previous month">&#8249;</button>
+        <span class="gc-month-title" id="gcMonthTitle">January</span>
+        <button class="gc-nav-btn" id="gcNext" aria-label="Next month">&#8250;</button>
+      </div>
+      <div class="gc-pill-strip" id="gcPillStrip"></div>
+      <div class="gc-dow">
+        <div class="gc-dow-cell">S</div><div class="gc-dow-cell">M</div>
+        <div class="gc-dow-cell">T</div><div class="gc-dow-cell">W</div>
+        <div class="gc-dow-cell">T</div><div class="gc-dow-cell">F</div>
+        <div class="gc-dow-cell">S</div>
+      </div>
+      <div class="gc-grid" id="gcGrid"></div>
+      <div class="gc-stats-row">
+        <div class="gc-stat"><div class="gc-stat-num gc-green" id="gcStatGym">0</div><div class="gc-stat-lbl">Gym days</div></div>
+        <div class="gc-stat"><div class="gc-stat-num"          id="gcStatRest">0</div><div class="gc-stat-lbl">Rest days</div></div>
+        <div class="gc-stat"><div class="gc-stat-num gc-green" id="gcStatStreak">0</div><div class="gc-stat-lbl">🔥 Streak</div></div>
+      </div>
+      <div class="gc-legend">
+        <div class="gc-legend-item"><div class="gc-legend-dot gc-gym"></div>Gym</div>
+        <div class="gc-legend-item"><div class="gc-legend-dot gc-rest"></div>Rest</div>
+        <div class="gc-legend-item"><div class="gc-legend-dot gc-none"></div>Not logged</div>
+      </div>
+    </div>
   </div>
 
   <div class="po-header">
@@ -3463,6 +3608,219 @@ img, video, canvas, svg { max-width: 100%; }
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) pcFlushPushOnUnload();
   });
+
+  // ===== GYM ATTENDANCE CALENDAR =====
+  (function () {
+    const CAL_LS  = 'gym_calendar_2026';   // localStorage key
+    const CAL_ROW = 'gym_calendar_2026';   // Supabase row key
+
+    const MONTHS      = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const MONTHS_S    = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const DAYS        = [31,28,31,30,31,30,31,31,30,31,30,31]; // 2026 is not a leap year
+
+    const now2026  = new Date().getFullYear() === 2026;
+    let curMonth   = now2026 ? new Date().getMonth() : 0;
+    let calData    = {}; // { 'YYYY-MM-DD': 1 | 2 }
+
+    // ── Storage ──────────────────────────────────────────
+    function loadCal() {
+      try { const r = localStorage.getItem(CAL_LS); if (r) calData = JSON.parse(r) || {}; } catch {}
+    }
+    function saveCal() {
+      try { localStorage.setItem(CAL_LS, JSON.stringify(calData)); } catch {}
+    }
+
+    function dKey(m, d) {
+      return '2026-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    }
+    function todayStr() {
+      const n = new Date();
+      return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0');
+    }
+
+    // ── Render ────────────────────────────────────────────
+    function renderPills() {
+      const strip = document.getElementById('gcPillStrip');
+      if (!strip) return;
+      strip.innerHTML = MONTHS_S.map((m, i) =>
+        `<button class="gc-pill${i === curMonth ? ' gc-active' : ''}" data-m="${i}">${m}</button>`
+      ).join('');
+      strip.querySelectorAll('.gc-pill').forEach(btn => {
+        btn.addEventListener('click', () => { curMonth = +btn.dataset.m; renderCal(); });
+      });
+      const active = strip.querySelector('.gc-pill.gc-active');
+      if (active) setTimeout(() => active.scrollIntoView({ inline: 'center', behavior: 'smooth' }), 0);
+    }
+
+    function renderCal() {
+      const titleEl = document.getElementById('gcMonthTitle');
+      const prevBtn = document.getElementById('gcPrev');
+      const nextBtn = document.getElementById('gcNext');
+      const grid    = document.getElementById('gcGrid');
+      if (!grid) return;
+
+      if (titleEl) titleEl.textContent = MONTHS[curMonth];
+      if (prevBtn) prevBtn.disabled = curMonth === 0;
+      if (nextBtn) nextBtn.disabled = curMonth === 11;
+      renderPills();
+
+      const days     = DAYS[curMonth];
+      const firstDow = new Date(2026, curMonth, 1).getDay(); // 0 = Sun
+      const today    = todayStr();
+
+      let html = '';
+      for (let i = 0; i < firstDow; i++) {
+        html += '<div class="gc-cell gc-spacer"><div class="gc-dot"></div></div>';
+      }
+      for (let d = 1; d <= days; d++) {
+        const k     = dKey(curMonth, d);
+        const state = calData[k] || 0;
+        const isToday = k === today;
+        const dotCls  = state === 1 ? ' gc-gym' : state === 2 ? ' gc-rest' : '';
+        const ringCls = isToday ? ' gc-today-ring' : '';
+        html += `<div class="gc-cell" data-k="${k}"><div class="gc-dot${dotCls}${ringCls}">${d}</div></div>`;
+      }
+      grid.innerHTML = html;
+
+      grid.querySelectorAll('.gc-cell:not(.gc-spacer)').forEach(cell => {
+        cell.addEventListener('click', () => {
+          const k = cell.dataset.k;
+          const next = ((calData[k] || 0) + 1) % 3;
+          if (next === 0) delete calData[k];
+          else calData[k] = next;
+          saveCal();
+          renderCal();
+          renderStats();
+          gcSchedulePush();
+        });
+      });
+
+      renderStats();
+    }
+
+    function renderStats() {
+      let gymCount = 0, restCount = 0, streak = 0;
+      for (const v of Object.values(calData)) {
+        if (v === 1) gymCount++;
+        else if (v === 2) restCount++;
+      }
+      // Current gym streak (consecutive gym days ending at today or yesterday)
+      const base = new Date();
+      for (let i = 0; i < 366; i++) {
+        const d = new Date(base);
+        d.setDate(d.getDate() - i);
+        if (d.getFullYear() !== 2026) break;
+        const k = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        if ((calData[k] || 0) === 1) streak++;
+        else break;
+      }
+      const gEl = document.getElementById('gcStatGym');
+      const rEl = document.getElementById('gcStatRest');
+      const sEl = document.getElementById('gcStatStreak');
+      if (gEl) gEl.textContent = gymCount;
+      if (rEl) rEl.textContent = restCount;
+      if (sEl) sEl.textContent = streak;
+    }
+
+    // ── Swipe navigation ─────────────────────────────────
+    let swipeX = null;
+    const gcCard = document.querySelector('.gc-card');
+    if (gcCard) {
+      gcCard.addEventListener('touchstart', e => { swipeX = e.touches[0].clientX; }, { passive: true });
+      gcCard.addEventListener('touchend', e => {
+        if (swipeX === null) return;
+        const dx = e.changedTouches[0].clientX - swipeX;
+        swipeX = null;
+        if (Math.abs(dx) < 44) return;
+        if (dx < 0 && curMonth < 11) { curMonth++; renderCal(); }
+        if (dx > 0 && curMonth > 0)  { curMonth--; renderCal(); }
+      }, { passive: true });
+    }
+
+    const prevBtn = document.getElementById('gcPrev');
+    const nextBtn = document.getElementById('gcNext');
+    if (prevBtn) prevBtn.addEventListener('click', () => { if (curMonth > 0)  { curMonth--; renderCal(); } });
+    if (nextBtn) nextBtn.addEventListener('click', () => { if (curMonth < 11) { curMonth++; renderCal(); } });
+
+    // ── Supabase sync ─────────────────────────────────────
+    let gcSupa = null, gcTimer = null, gcLastJson = null;
+
+    function gcCollect() { return { [CAL_LS]: calData }; }
+
+    async function gcPushNow() {
+      if (!gcSupa) return;
+      const data = gcCollect(), json = JSON.stringify(data);
+      if (json === gcLastJson) return;
+      try {
+        const { error } = await gcSupa.from('app_state').upsert(
+          { key: CAL_ROW, data, updated_at: new Date().toISOString() },
+          { onConflict: 'key' }
+        );
+        if (!error) gcLastJson = json;
+      } catch {}
+    }
+    function gcSchedulePush() {
+      clearTimeout(gcTimer);
+      gcTimer = setTimeout(gcPushNow, 350);
+    }
+    function gcFlush() {
+      if (!gcSupa) return;
+      const data = gcCollect(), json = JSON.stringify(data);
+      if (json === gcLastJson) return;
+      try {
+        fetch(SUPABASE_URL + '/rest/v1/app_state?on_conflict=key', {
+          method: 'POST',
+          headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' },
+          body: JSON.stringify({ key: CAL_ROW, data, updated_at: new Date().toISOString() }),
+          keepalive: true
+        }).catch(() => {});
+      } catch {}
+    }
+    function gcApplyRemote(remote) {
+      if (!remote || !remote[CAL_LS]) return false;
+      const inc = JSON.stringify(remote[CAL_LS]);
+      if (localStorage.getItem(CAL_LS) === inc) return false;
+      try { localStorage.setItem(CAL_LS, inc); calData = remote[CAL_LS]; } catch {}
+      return true;
+    }
+
+    window.addEventListener('pagehide', gcFlush);
+    window.addEventListener('beforeunload', gcFlush);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) gcFlush(); });
+
+    (async function gcInit() {
+      if (!window.supabase || !SUPABASE_URL || !SUPABASE_KEY) return;
+      if (SUPABASE_URL.indexOf('PASTE-') === 0) return;
+      gcSupa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      try {
+        const { data: fd, error: fe } = await gcSupa.from('app_state').select('data').eq('key', CAL_ROW).maybeSingle();
+        if (!fe && fd && fd.data) {
+          if (gcApplyRemote(fd.data)) {
+            gcLastJson = JSON.stringify(gcCollect());
+            renderCal();
+          }
+        } else if (Object.keys(calData).length > 0) {
+          gcSchedulePush();
+        }
+      } catch {}
+      gcSupa.channel('gym_cal_ch')
+        .on('postgres_changes', {
+          event: '*', schema: 'public', table: 'app_state',
+          filter: 'key=eq.' + CAL_ROW,
+        }, payload => {
+          if (!payload.new || !payload.new.data) return;
+          const oursJson = JSON.stringify(gcCollect());
+          if (JSON.stringify({ [CAL_LS]: payload.new.data[CAL_LS] }) === oursJson) return; // echo
+          gcLastJson = JSON.stringify({ [CAL_LS]: payload.new.data[CAL_LS] });
+          if (gcApplyRemote(payload.new.data)) renderCal();
+        })
+        .subscribe();
+    })();
+
+    // ── Init ──────────────────────────────────────────────
+    loadCal();
+    renderCal();
+  })();
 })();
 </script>
 
