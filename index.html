@@ -771,7 +771,7 @@ body::after {
       const old = getGoals(k);
       old.forEach(g => {
         if (!g.done && g.text && !texts.has(g.text)) {
-          today.push({ text: g.text, done: false });
+          today.push({ text: g.text, done: false, rolledOver: true });
           texts.add(g.text);
         }
       });
@@ -813,12 +813,15 @@ body::after {
   let tickerTimer = null;
 
   function buildTickerItems() {
-    const goals = getGoals(todayKey());
-    const total = goals.length;
-    const done  = goals.filter(g => g.done).length;
-    if (total === 0) return { items: [{ status: 'empty',   text: 'No goals set for today — add one to get rolling.' }], done, total };
-    if (done === total) return { items: [{ status: 'done', text: '✓ All goals done — solid day.' }], done, total };
-    const items = goals.filter(g => !g.done).map(g => ({ status: 'pending', text: g.text }));
+    const all   = getGoals(todayKey());
+    const fresh = all.filter(g => !g.rolledOver);   // only goals added today
+    const total = fresh.length;
+    const done  = fresh.filter(g => g.done).length;
+    const allAllDone = all.length > 0 && all.every(g => g.done);
+    if (allAllDone)    return { items: [{ status: 'done',  text: '✓ All goals done — solid day.'          }], done: all.filter(g => g.done).length, total: all.length };
+    if (total === 0)   return { items: [{ status: 'empty', text: 'No goals yet today — add one below.'    }], done: 0, total: 0 };
+    if (done === total) return { items: [{ status: 'done', text: '✓ Today\'s goals done — solid day.'     }], done, total };
+    const items = fresh.filter(g => !g.done).map(g => ({ status: 'pending', text: g.text }));
     return { items, done, total };
   }
 
