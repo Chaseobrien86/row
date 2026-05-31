@@ -1567,16 +1567,81 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 @media (max-width: 600px) {
   .sub-auto-toggle { width: 100%; justify-content: space-between; padding: 12px 14px; }
 }
+
+/* ── Reset button + confirmation modal ── */
+.fin-top-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.fin-top-row .fin-back-btn { margin-bottom: 0; }
+
+.fin-reset-btn {
+  width: 32px; height: 32px; border-radius: 9px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.28); font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  -webkit-tap-highlight-color: transparent; line-height: 1; letter-spacing: 0.1em;
+}
+.fin-reset-btn:hover { background: rgba(239,68,68,0.09); border-color: rgba(239,68,68,0.22); color: #ff8a8a; }
+
+.fin-confirm-bg {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; pointer-events: none; transition: opacity 0.18s ease;
+}
+.fin-confirm-bg.show { opacity: 1; pointer-events: all; }
+.fin-confirm-box {
+  background: #161618; border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 20px; padding: 28px 22px 22px;
+  width: 100%; max-width: 320px;
+  transform: scale(0.93) translateY(10px);
+  transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.fin-confirm-bg.show .fin-confirm-box { transform: scale(1) translateY(0); }
+.fin-confirm-icon { font-size: 30px; text-align: center; margin-bottom: 12px; }
+.fin-confirm-title {
+  font: 700 16px/1.3 -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  color: #FAFAFA; text-align: center; margin-bottom: 8px;
+}
+.fin-confirm-msg {
+  font: 400 13px/1.55 -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  color: rgba(255,255,255,0.42); text-align: center; margin-bottom: 22px;
+}
+.fin-confirm-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.fin-confirm-cancel {
+  padding: 12px; border-radius: 10px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09);
+  color: rgba(255,255,255,0.65); font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  cursor: pointer; transition: background 0.15s; -webkit-tap-highlight-color: transparent;
+}
+.fin-confirm-cancel:hover { background: rgba(255,255,255,0.10); }
+.fin-confirm-do-reset {
+  padding: 12px; border-radius: 10px;
+  background: rgba(239,68,68,0.14); border: 1px solid rgba(239,68,68,0.28);
+  color: #ff8a8a; font: 700 13px/1 -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.fin-confirm-do-reset:hover  { background: rgba(239,68,68,0.22); }
+.fin-confirm-do-reset:active { transform: scale(0.97); }
+.fin-confirm-do-reset:disabled { opacity: 0.5; cursor: default; transform: none; }
 </style>
 </head>
 <body>
 <div class="shell">
 
-<!-- ===== BACK BUTTON ===== -->
-<a href="index.html" class="fin-back-btn" aria-label="Back to dashboard">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-  <span>Back</span>
-</a>
+<!-- ===== HEADER ROW ===== -->
+<div class="fin-top-row">
+  <a href="index.html" class="fin-back-btn" aria-label="Back to dashboard">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    <span>Back</span>
+  </a>
+  <button class="fin-reset-btn" id="finResetBtn" aria-label="Reset all finance data" title="Reset all finance data">···</button>
+</div>
 
 <!-- ===== FINANCE TICKER (rotating subscription renewals) ===== -->
 <div class="finance-ticker hidden" id="financeTicker">
@@ -1863,6 +1928,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   </div>
 </div>
 
+</div>
+
+<!-- ===== RESET CONFIRMATION MODAL ===== -->
+<div class="fin-confirm-bg" id="finConfirmBg" aria-hidden="true">
+  <div class="fin-confirm-box" role="alertdialog" aria-modal="true" aria-labelledby="finConfirmTitle">
+    <div class="fin-confirm-icon">🗑️</div>
+    <div class="fin-confirm-title" id="finConfirmTitle">Reset all finance data?</div>
+    <div class="fin-confirm-msg">Are you sure you want to reset all finance data? This cannot be undone.</div>
+    <div class="fin-confirm-btns">
+      <button class="fin-confirm-cancel"   id="finConfirmCancel">Cancel</button>
+      <button class="fin-confirm-do-reset" id="finConfirmReset">Reset Data</button>
+    </div>
+  </div>
 </div>
 
 <!-- ===== BOTTOM TAB BAR ===== -->
@@ -3373,6 +3451,51 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
   safeRenderTicker();
   setInterval(safeRenderTicker, 1500);
+
+  // ======= Reset =======
+  (function () {
+    const RESET_U = 'https://rsoobyusmktmoewlcjnq.supabase.co';
+    const RESET_K = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzb29ieXVzbWt0bW9ld2xjam5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5ODE2MDgsImV4cCI6MjA5NTU1NzYwOH0.erJXvbrZclXGVRAOp52cBD4Dzp6_BDiKyF0MupsBT1g';
+
+    const bg         = document.getElementById('finConfirmBg');
+    const openBtn    = document.getElementById('finResetBtn');
+    const cancelBtn  = document.getElementById('finConfirmCancel');
+    const resetBtn   = document.getElementById('finConfirmReset');
+
+    function openModal()  { bg.classList.add('show');    bg.setAttribute('aria-hidden', 'false'); }
+    function closeModal() { bg.classList.remove('show'); bg.setAttribute('aria-hidden', 'true');  }
+
+    openBtn.addEventListener('click',  openModal);
+    cancelBtn.addEventListener('click', closeModal);
+    bg.addEventListener('click', e => { if (e.target === bg) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    resetBtn.addEventListener('click', async () => {
+      resetBtn.textContent = 'Resetting…';
+      resetBtn.disabled    = true;
+
+      // 1. Clear all finance keys from localStorage
+      const toRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith('nw:') || k === 'subs' || k === 'nw_currency' || k === 'finance_active_tab')) {
+          toRemove.push(k);
+        }
+      }
+      toRemove.forEach(k => localStorage.removeItem(k));
+
+      // 2. Delete the finance row from Supabase
+      try {
+        if (window.supabase) {
+          const supa = window.supabase.createClient(RESET_U, RESET_K);
+          await supa.from('app_state').delete().eq('key', 'finance');
+        }
+      } catch (_e) { /* offline — local data already cleared */ }
+
+      // 3. Reload fresh
+      window.location.reload();
+    });
+  })();
 
   // ======= Cloud sync =======
   (function () {
