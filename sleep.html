@@ -536,6 +536,72 @@ input[type="range"]::-moz-range-thumb {
 .modal-save:hover { filter: brightness(1.05); }
 .modal-save:active { transform: scale(0.98); }
 
+/* ── Source badges ── */
+.src-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px 2px 6px;
+  border-radius: 999px;
+  font: 700 9px/1 var(--font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.src-badge.watch {
+  background: rgba(107,227,164,0.10);
+  border: 1px solid rgba(107,227,164,0.24);
+  color: var(--success);
+}
+.src-badge.manual {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-quaternary);
+}
+
+/* ── Apple Watch history card accent ── */
+.hist-card.is-watch { border-left: 2px solid rgba(107,227,164,0.38); }
+
+/* ── Sleep stage breakdown bar ── */
+.stage-wrap {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.stage-label-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.stage-lbl {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font: 600 10px/1 var(--font-mono);
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+}
+.stage-lbl-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.stage-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.05);
+  overflow: hidden;
+  display: flex;
+}
+.stage-seg { height: 100%; }
+.stage-seg + .stage-seg { margin-left: 1px; }
+
+/* ── Chart legend watch entry ── */
+.leg-watch { color: var(--success); }
+.leg-watch::before { background: rgba(107,227,164,0.6); width: 2px !important; height: 10px !important; border-radius: 1px !important; }
+
 @media (max-width: 480px) {
   .page-title { font-size: 24px; }
   .metric-val { font-size: 22px; }
@@ -589,6 +655,7 @@ input[type="range"]::-moz-range-thumb {
       <span class="leg-yellow">4–6 Fair</span>
       <span class="leg-green">7–10 Good</span>
       <span class="leg-goal">— 7h goal</span>
+      <span class="leg-watch">⌚ Apple Watch</span>
     </div>
   </div>
 
@@ -839,6 +906,10 @@ async function logSleep() {
     duration_hours: Math.round(duration * 100) / 100,
     quality_rating: quality,
     notes: notes,
+    data_source: 'manual',
+    deep_sleep_minutes: null,
+    rem_sleep_minutes: null,
+    core_sleep_minutes: null,
     created_at: new Date().toISOString()
   };
 
@@ -930,11 +1001,16 @@ function renderMetrics() {
   var last14 = logs.filter(function(l){ return l.date >= c14str; });
   var last7  = logs.filter(function(l){ return l.date >= c7str; });
 
+  var watchCount14 = last14.filter(function(l){ return l.data_source === 'apple_watch'; }).length;
+  var watchCount7  = last7.filter(function(l){ return l.data_source === 'apple_watch'; }).length;
+
   // Avg duration
   if (last14.length) {
     var avgDur = last14.reduce(function(s,l){ return s + l.duration_hours; }, 0) / last14.length;
     document.getElementById('mAvgDur').textContent    = fmtDur(avgDur);
-    document.getElementById('mAvgDurSub').textContent = 'across ' + last14.length + ' night' + (last14.length>1?'s':'');
+    document.getElementById('mAvgDurSub').textContent =
+      last14.length + ' night' + (last14.length > 1 ? 's' : '') +
+      (watchCount14 > 0 ? ' · ' + watchCount14 + ' ⌚' : '');
   }
   // Avg quality
   if (last14.length) {
@@ -942,16 +1018,21 @@ function renderMetrics() {
     var avgQEl = document.getElementById('mAvgQ');
     avgQEl.textContent = avgQ.toFixed(1) + '/10';
     avgQEl.className = 'metric-val ' + (avgQ >= 7 ? 'green' : avgQ >= 4 ? 'yellow' : 'red');
-    document.getElementById('mAvgQSub').textContent = qualityLabel(Math.round(avgQ));
+    document.getElementById('mAvgQSub').textContent =
+      qualityLabel(Math.round(avgQ)) + (watchCount14 > 0 ? ' · ⌚ auto' : ' · manual');
   }
   // Best / worst this week
   if (last7.length) {
     var best  = last7.reduce(function(a,b){ return a.quality_rating >= b.quality_rating ? a : b; });
     var worst = last7.reduce(function(a,b){ return a.quality_rating <= b.quality_rating ? a : b; });
     document.getElementById('mBest').textContent    = fmtDur(best.duration_hours);
-    document.getElementById('mBestSub').textContent = fmtDate(best.date) + ' · ' + best.quality_rating + '/10';
+    document.getElementById('mBestSub').textContent =
+      fmtDate(best.date) + ' · ' + best.quality_rating + '/10' +
+      (best.data_source === 'apple_watch' ? ' · ⌚' : '');
     document.getElementById('mWorst').textContent    = fmtDur(worst.duration_hours);
-    document.getElementById('mWorstSub').textContent = fmtDate(worst.date) + ' · ' + worst.quality_rating + '/10';
+    document.getElementById('mWorstSub').textContent =
+      fmtDate(worst.date) + ' · ' + worst.quality_rating + '/10' +
+      (worst.data_source === 'apple_watch' ? ' · ⌚' : '');
   }
   // 7+ hour streak (consecutive from most recent going backward)
   var sorted = logs.slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
@@ -1063,6 +1144,20 @@ function renderChart() {
 
     svg.appendChild(rect);
 
+    // Apple Watch left-edge accent stripe
+    if (log.data_source === 'apple_watch') {
+      var accent = document.createElementNS(NS, 'rect');
+      accent.setAttribute('x', x);
+      accent.setAttribute('y', y);
+      accent.setAttribute('width', Math.max(2, Math.floor(barW * 0.18)));
+      accent.setAttribute('height', barH);
+      accent.setAttribute('fill', '#6BE3A4');
+      accent.setAttribute('rx', '3');
+      accent.setAttribute('opacity', '0.70');
+      accent.style.pointerEvents = 'none';
+      svg.appendChild(accent);
+    }
+
     // Date label
     var dateLbl = document.createElementNS(NS, 'text');
     dateLbl.setAttribute('x', cx);
@@ -1081,12 +1176,38 @@ function renderChart() {
 /* Chart tooltip */
 var _tip = document.getElementById('chartTooltip');
 function showChartTip(log, cx, cy) {
-  var color = qualityColor(log.quality_rating);
+  var color   = qualityColor(log.quality_rating);
+  var isWatch = log.data_source === 'apple_watch';
+  var src     = isWatch
+    ? '<span style="color:var(--success);font-size:9px;letter-spacing:.05em;"> ⌚ APPLE WATCH</span>'
+    : '<span style="color:var(--text-quaternary);font-size:9px;letter-spacing:.05em;"> ✏ MANUAL</span>';
+
+  var stagesHtml = '';
+  if (log.deep_sleep_minutes != null || log.rem_sleep_minutes != null || log.core_sleep_minutes != null) {
+    var total = (log.deep_sleep_minutes || 0) + (log.rem_sleep_minutes || 0) + (log.core_sleep_minutes || 0);
+    stagesHtml = '<div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;">';
+    if (log.deep_sleep_minutes != null)
+      stagesHtml += '<span style="font:600 10px/1 var(--font-mono);color:#818CF8;">Deep ' + log.deep_sleep_minutes + 'm</span>';
+    if (log.rem_sleep_minutes != null)
+      stagesHtml += '<span style="font:600 10px/1 var(--font-mono);color:#A78BFA;">REM ' + log.rem_sleep_minutes + 'm</span>';
+    if (log.core_sleep_minutes != null)
+      stagesHtml += '<span style="font:600 10px/1 var(--font-mono);color:#38BDF8;">Core ' + log.core_sleep_minutes + 'm</span>';
+    stagesHtml += '</div>';
+    if (total > 0) {
+      stagesHtml += '<div style="margin-top:4px;height:4px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden;display:flex;">';
+      if (log.deep_sleep_minutes) stagesHtml += '<div style="height:100%;width:' + (log.deep_sleep_minutes/total*100).toFixed(1) + '%;background:#818CF8;opacity:.85;"></div>';
+      if (log.rem_sleep_minutes)  stagesHtml += '<div style="height:100%;width:' + (log.rem_sleep_minutes /total*100).toFixed(1) + '%;background:#A78BFA;opacity:.85;margin-left:1px;"></div>';
+      if (log.core_sleep_minutes) stagesHtml += '<div style="height:100%;width:' + (log.core_sleep_minutes/total*100).toFixed(1) + '%;background:#38BDF8;opacity:.85;margin-left:1px;"></div>';
+      stagesHtml += '</div>';
+    }
+  }
+
   _tip.innerHTML =
-      '<div class="tt-date">' + esc(fmtDate(log.date)) + '</div>'
+      '<div class="tt-date">' + esc(fmtDate(log.date)) + src + '</div>'
     + '<div class="tt-times">' + esc(fmt12h(log.bedtime)) + ' &rarr; ' + esc(fmt12h(log.wake_time)) + '</div>'
     + '<div class="tt-dur" style="color:' + color + ';">' + esc(fmtDur(log.duration_hours)) + '</div>'
-    + '<div class="tt-q" style="color:' + color + ';">Quality ' + log.quality_rating + '/10 &middot; ' + esc(qualityLabel(log.quality_rating)) + '</div>';
+    + '<div class="tt-q" style="color:' + color + ';">Quality ' + log.quality_rating + '/10 &middot; ' + esc(qualityLabel(log.quality_rating)) + '</div>'
+    + stagesHtml;
   _tip.style.display = 'block';
   moveChartTip(cx, cy);
 }
@@ -1104,6 +1225,31 @@ function moveChartTip(cx, cy) {
 function hideChartTip() { _tip.style.display = 'none'; }
 
 /* ── Render: history list ── */
+function sourceBadgeHTML(log) {
+  var isWatch = log.data_source === 'apple_watch';
+  return '<span class="src-badge ' + (isWatch ? 'watch' : 'manual') + '">'
+    + (isWatch ? '⌚ Apple Watch' : '✏ Manual')
+    + '</span>';
+}
+
+function stageBarHTML(log) {
+  var deep = log.deep_sleep_minutes, rem = log.rem_sleep_minutes, core = log.core_sleep_minutes;
+  if (deep == null && rem == null && core == null) return '';
+  var total = (deep || 0) + (rem || 0) + (core || 0);
+  if (total === 0) return '';
+  var html = '<div class="stage-wrap">'
+    + '<div class="stage-label-row">';
+  if (deep != null) html += '<span class="stage-lbl"><span class="stage-lbl-dot" style="background:#818CF8;"></span>Deep ' + deep + 'm</span>';
+  if (rem  != null) html += '<span class="stage-lbl"><span class="stage-lbl-dot" style="background:#A78BFA;"></span>REM ' + rem + 'm</span>';
+  if (core != null) html += '<span class="stage-lbl"><span class="stage-lbl-dot" style="background:#38BDF8;"></span>Core ' + core + 'm</span>';
+  html += '</div><div class="stage-bar">';
+  if (deep != null) html += '<div class="stage-seg" style="width:' + (deep/total*100).toFixed(1) + '%;background:#818CF8;opacity:.80;"></div>';
+  if (rem  != null) html += '<div class="stage-seg" style="width:' + (rem /total*100).toFixed(1) + '%;background:#A78BFA;opacity:.80;"></div>';
+  if (core != null) html += '<div class="stage-seg" style="width:' + (core/total*100).toFixed(1) + '%;background:#38BDF8;opacity:.80;"></div>';
+  html += '</div></div>';
+  return html;
+}
+
 function renderHistory() {
   var list = document.getElementById('historyList');
   list.innerHTML = '';
@@ -1114,11 +1260,15 @@ function renderHistory() {
   var sorted = logs.slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
   sorted.forEach(function(log) {
     var card = document.createElement('div');
-    card.className = 'hist-card';
+    var isWatch = log.data_source === 'apple_watch';
+    card.className = 'hist-card' + (isWatch ? ' is-watch' : '');
     var color = qualityColor(log.quality_rating);
     card.innerHTML =
         '<div class="hist-top">'
-      +   '<span class="hist-date">' + esc(fmtDate(log.date)) + '</span>'
+      +   '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+      +     '<span class="hist-date">' + esc(fmtDate(log.date)) + '</span>'
+      +     sourceBadgeHTML(log)
+      +   '</div>'
       +   '<div class="hist-actions">'
       +     '<button class="hist-btn" data-edit="' + esc(log.id) + '" title="Edit">✎</button>'
       +     '<button class="hist-btn del" data-del="' + esc(log.id) + '" title="Delete">×</button>'
@@ -1129,7 +1279,8 @@ function renderHistory() {
       +   '<span class="hist-dur">' + esc(fmtDur(log.duration_hours)) + '</span>'
       +   '<span class="hist-stars" style="color:' + color + ';">' + esc(qualityStars(log.quality_rating)) + ' <span style="font-size:11px;font-family:var(--font-mono);">' + log.quality_rating + '/10</span></span>'
       + '</div>'
-      + (log.notes ? '<div class="hist-notes">' + esc(log.notes) + '</div>' : '');
+      + (log.notes ? '<div class="hist-notes">' + esc(log.notes) + '</div>' : '')
+      + stageBarHTML(log);
     card.querySelector('[data-edit]').addEventListener('click', function() {
       openEdit(log.id);
     });
