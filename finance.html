@@ -685,6 +685,107 @@ body::after {
   border-color: rgba(255,107,107,0.38);
 }
 
+/* ── Allocation donut chart ── */
+.alloc-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 24px rgba(0,0,0,0.32);
+  margin-bottom: 20px;
+}
+.alloc-note {
+  font: 600 11px/1 var(--font-mono);
+  color: var(--text-quaternary);
+  letter-spacing: 0.04em;
+  margin-bottom: 14px;
+  padding: 7px 10px;
+  background: rgba(242,192,99,0.06);
+  border: 1px solid rgba(242,192,99,0.14);
+  border-radius: 8px;
+}
+.alloc-layout {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.alloc-chart-wrap {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+}
+#allocSvg { width: 100%; height: 100%; display: block; overflow: visible; }
+.alloc-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  pointer-events: none; text-align: center;
+  padding: 8px;
+}
+.alloc-center-label {
+  font: 700 9px/1 var(--font-mono);
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-tertiary); margin-bottom: 5px;
+  transition: color 0.15s;
+}
+.alloc-center-val {
+  font: 700 16px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em; color: var(--text-primary);
+}
+.alloc-center-pct {
+  font: 600 11px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-tertiary); margin-top: 3px;
+  min-height: 14px;
+}
+.alloc-legend {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.alloc-leg-row {
+  display: flex; align-items: center; gap: 9px;
+  padding: 6px 8px; border-radius: 8px; cursor: pointer;
+  transition: background 0.12s; min-width: 0;
+}
+.alloc-leg-row:hover { background: rgba(255,255,255,0.05); }
+.alloc-dot {
+  width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0;
+}
+.alloc-sym {
+  font: 700 12px/1 var(--font-mono);
+  color: var(--text-primary); letter-spacing: 0.04em;
+  flex-shrink: 0; width: 46px;
+}
+.alloc-pct {
+  font: 600 12px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary); flex-shrink: 0; width: 44px;
+}
+.alloc-name {
+  font: 400 11px/1 var(--font); color: var(--text-quaternary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+}
+.alloc-tooltip {
+  position: fixed; z-index: 900;
+  background: rgba(14, 14, 18, 0.96);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px; padding: 10px 14px;
+  pointer-events: none;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.55);
+  min-width: 150px;
+}
+@media (max-width: 560px) {
+  .alloc-layout { flex-direction: column; align-items: center; }
+  .alloc-chart-wrap { width: 160px; height: 160px; }
+  .alloc-legend { width: 100%; }
+  .alloc-name { display: none; }
+}
+
 /* ── Mobile tweaks ── */
 @media (max-width: 480px) {
   .port-total { font-size: 32px; }
@@ -771,7 +872,27 @@ body::after {
     </div>
   </div>
 
+  <!-- Allocation -->
+  <div class="sect-label">Allocation</div>
+  <div class="alloc-card">
+    <div class="alloc-note" id="allocNote" style="display:none;">Based on cost basis — tap Refresh to load live prices</div>
+    <div class="alloc-layout">
+      <div class="alloc-chart-wrap">
+        <svg id="allocSvg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="alloc-center">
+          <div class="alloc-center-label" id="allocLabel">Portfolio</div>
+          <div class="alloc-center-val" id="allocCenterVal">—</div>
+          <div class="alloc-center-pct" id="allocCenterPct"></div>
+        </div>
+      </div>
+      <div class="alloc-legend" id="allocLegend"></div>
+    </div>
+  </div>
+
 </div><!-- /page -->
+
+<!-- Allocation tooltip (fixed, clears overflow:hidden) -->
+<div class="alloc-tooltip" id="allocTooltip" style="display:none;"></div>
 
 <!-- ═══ Edit Holdings Modal ═══ -->
 <div class="modal-overlay" id="editOverlay">
@@ -1005,11 +1126,152 @@ function hideError() {
   document.getElementById('errBanner').classList.remove('show');
 }
 
+/* ── Allocation chart helpers ────────────────────────────── */
+var ALLOC_COLORS = [
+  '#6EE7B7', // teal (matches --success)
+  '#818CF8', // indigo
+  '#FCD34D', // yellow
+  '#F87171', // coral
+  '#38BDF8', // sky
+  '#F97316', // orange
+  '#A78BFA', // violet
+  '#FB923C', // warm-orange
+  '#34D399', // emerald
+  '#60A5FA', // blue
+  '#E879F9', // fuchsia
+];
+
+function polarToCart(cx, cy, r, deg) {
+  var rad = ((deg - 90) * Math.PI) / 180;
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+}
+function arcPath(cx, cy, R, r, a0, a1) {
+  if (a1 - a0 >= 360) a1 = a0 + 359.99;
+  var oS = polarToCart(cx, cy, R, a0), oE = polarToCart(cx, cy, R, a1);
+  var iE = polarToCart(cx, cy, r, a1), iS = polarToCart(cx, cy, r, a0);
+  var lg = (a1 - a0) > 180 ? 1 : 0;
+  return ['M', oS.x.toFixed(2), oS.y.toFixed(2),
+          'A', R, R, 0, lg, 1, oE.x.toFixed(2), oE.y.toFixed(2),
+          'L', iE.x.toFixed(2), iE.y.toFixed(2),
+          'A', r, r, 0, lg, 0, iS.x.toFixed(2), iS.y.toFixed(2), 'Z'].join(' ');
+}
+
+var _aTip = null;
+function showAllocTip(s, cx, cy) {
+  if (!_aTip) _aTip = document.getElementById('allocTooltip');
+  _aTip.innerHTML =
+      '<div style="font:700 10px/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:6px;">' + esc(s.symbol) + '</div>'
+    + '<div style="font:600 15px/1.3 var(--font-mono);font-variant-numeric:tabular-nums;color:var(--text-primary);">' + esc(fmt$(s.value)) + '</div>'
+    + '<div style="font:700 12px/1 var(--font-mono);color:' + s.color + ';margin-top:5px;">' + s.pct.toFixed(2) + '% of portfolio</div>';
+  _aTip.style.display = 'block';
+  moveAllocTip(cx, cy);
+}
+function moveAllocTip(cx, cy) {
+  if (!_aTip) return;
+  var w = _aTip.offsetWidth || 155, h = _aTip.offsetHeight || 72;
+  var x = cx + 14, y = cy - h / 2;
+  if (x + w > window.innerWidth  - 8) x = cx - w - 14;
+  if (y < 8)                          y = 8;
+  if (y + h > window.innerHeight - 8) y = window.innerHeight - h - 8;
+  _aTip.style.left = x + 'px'; _aTip.style.top = y + 'px';
+}
+function hideAllocTip() { if (_aTip) _aTip.style.display = 'none'; }
+
+function renderAllocation() {
+  var svgEl    = document.getElementById('allocSvg');
+  var legendEl = document.getElementById('allocLegend');
+  var cvEl     = document.getElementById('allocCenterVal');
+  var clEl     = document.getElementById('allocLabel');
+  var cpEl     = document.getElementById('allocCenterPct');
+  var noteEl   = document.getElementById('allocNote');
+  if (!svgEl) return;
+  svgEl.innerHTML = '';
+  legendEl.innerHTML = '';
+
+  var allPrices  = positions.length > 0 && positions.every(function(p) { return !!cache[p.symbol]; });
+  var somePrices = positions.some(function(p) { return !!cache[p.symbol]; });
+
+  var slices = [], totalVal = CASH;
+  positions.forEach(function(p) {
+    var q = cache[p.symbol];
+    var v = q ? q.price * p.shares : p.shares * p.avgCost;
+    totalVal += v;
+    slices.push({ symbol: p.symbol, name: p.name, value: v, hasPrice: !!q });
+  });
+  slices.push({ symbol: 'Cash', name: 'Cash & Equivalents', value: CASH, hasPrice: true });
+
+  noteEl.style.display = allPrices ? 'none' : 'block';
+  clEl.textContent = allPrices ? 'Portfolio' : 'Cost Basis';
+  cvEl.textContent = totalVal > 0 ? fmt$(totalVal) : '—';
+  cpEl.textContent = '';
+
+  if (totalVal <= 0) return;
+
+  var cx = 100, cy = 100, R = 88, r = 56, angle = 0;
+
+  slices.forEach(function(slice, i) {
+    slice.pct   = (slice.value / totalVal) * 100;
+    slice.color = ALLOC_COLORS[i % ALLOC_COLORS.length];
+    var sweep   = (slice.value / totalVal) * 360;
+    if (sweep < 0.3) { angle += sweep; return; }
+    var endAngle = angle + sweep;
+
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', arcPath(cx, cy, R, r, angle, endAngle));
+    path.setAttribute('fill', slice.color);
+    path.setAttribute('stroke', '#050506');
+    path.setAttribute('stroke-width', '1.5');
+    path.style.opacity    = '0.82';
+    path.style.cursor     = 'pointer';
+    path.style.transition = 'opacity 0.15s';
+
+    (function(s, pe) {
+      function onIn(ex, ey) {
+        pe.style.opacity = '1';
+        clEl.textContent = s.symbol; cvEl.textContent = fmt$(s.value);
+        cpEl.textContent = s.pct.toFixed(1) + '%';
+        showAllocTip(s, ex, ey);
+      }
+      function onOut() {
+        pe.style.opacity = '0.82';
+        clEl.textContent = allPrices ? 'Portfolio' : 'Cost Basis';
+        cvEl.textContent = fmt$(totalVal); cpEl.textContent = '';
+        hideAllocTip();
+      }
+      pe.addEventListener('mouseenter', function(e) { onIn(e.clientX, e.clientY); });
+      pe.addEventListener('mousemove',  function(e) { moveAllocTip(e.clientX, e.clientY); });
+      pe.addEventListener('mouseleave', onOut);
+      pe.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        var t = e.touches[0]; onIn(t.clientX, t.clientY);
+      }, { passive: false });
+      pe.addEventListener('touchend', function() { setTimeout(onOut, 1800); });
+
+      // Legend row
+      var row = document.createElement('div');
+      row.className = 'alloc-leg-row';
+      row.innerHTML =
+          '<div class="alloc-dot" style="background:' + s.color + ';box-shadow:0 0 5px ' + s.color + '55;"></div>'
+        + '<span class="alloc-sym">' + esc(s.symbol) + '</span>'
+        + '<span class="alloc-pct">' + s.pct.toFixed(1) + '%</span>'
+        + '<span class="alloc-name">' + esc(s.name) + '</span>';
+      row.addEventListener('mouseenter', function(e) { onIn(e.clientX, e.clientY); });
+      row.addEventListener('mousemove',  function(e) { moveAllocTip(e.clientX, e.clientY); });
+      row.addEventListener('mouseleave', onOut);
+      legendEl.appendChild(row);
+    }(slice, path));
+
+    svgEl.appendChild(path);
+    angle = endAngle;
+  });
+}
+
 /* ── Portfolio render ────────────────────────────────────── */
 function renderAll() {
   renderHeader();
   renderPositions();
   renderSummary();
+  renderAllocation();
 }
 
 function renderHeader() {
@@ -1034,7 +1296,7 @@ function renderHeader() {
     todayEl.className   = 'port-today ' + cCls(todayPnl);
     document.getElementById('portMeta').textContent = 'Updated ' + timeAgo(oldestFetch);
   } else if (Object.keys(cache).length > 0) {
-    document.getElementById('portTotal').textContent = fmt$(stocksVal + CASH) + '…';
+    document.getElementById('portTotal').textContent = fmt$(stocksVal + CASH);
     document.getElementById('portMeta').textContent = 'Partial data · tap Refresh';
   } else {
     document.getElementById('portTotal').textContent = '—';
