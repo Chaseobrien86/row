@@ -1007,21 +1007,7 @@ async function supaSave() {
   } catch (_) {}
 }
 
-/* ── Yahoo Finance (via /api/quote proxy) ────────────────── */
-async function fetchSymbol(sym) {
-  var res = await fetch('/api/quote?symbol=' + encodeURIComponent(sym));
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  var data = await res.json();
-  if (data.error) throw new Error(data.error);
-  return {
-    price:         data.price,
-    change:        data.change,
-    changePercent: data.changePercent,
-    prevClose:     data.prevClose,
-    fetchedAt:     Date.now()
-  };
-}
-
+/* ── Stooq quote proxy — one batch call for all symbols ─────── */
 async function fetchAll(force) {
   if (busy) return;
   if (!force) {
@@ -1035,12 +1021,26 @@ async function fetchAll(force) {
   busy = true;
   setLoading(true);
 
-  // Fetch all symbols in parallel; failures leave the cached price intact
-  await Promise.allSettled(
-    positions.map(function(p) {
-      return fetchSymbol(p.symbol).then(function(q) { cache[p.symbol] = q; });
-    })
-  );
+  var syms = positions.map(function(p) { return p.symbol; }).join(',');
+  try {
+    var res  = await fetch('/api/quote?symbols=' + encodeURIComponent(syms));
+    var data = await res.json();
+    var now  = Date.now();
+    if (data.quotes) {
+      Object.keys(data.quotes).forEach(function(sym) {
+        var q = data.quotes[sym];
+        cache[sym] = {
+          price:         q.price,
+          change:        q.change,
+          changePercent: q.changePercent,
+          prevClose:     q.prevClose,
+          fetchedAt:     now
+        };
+      });
+    }
+  } catch (e) {
+    console.warn('fetchAll error:', e.message);
+  }
 
   cacheSave();
   await supaSave();
