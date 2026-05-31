@@ -166,22 +166,6 @@ body::after {
   background: linear-gradient(90deg, rgba(255,255,255,0.07), transparent);
 }
 
-/* ── Error banner ── */
-.err-banner {
-  display: none;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  background: rgba(255, 107, 107, 0.07);
-  border: 1px solid rgba(255, 107, 107, 0.22);
-  border-radius: 12px;
-  font-size: 12px;
-  color: #FF9999;
-  font-family: var(--font-mono);
-  line-height: 1.5;
-}
-.err-banner.show { display: flex; }
 
 /* ── Position cards ── */
 .pos-list {
@@ -822,11 +806,6 @@ body::after {
     </div>
   </div>
 
-  <!-- Error banner -->
-  <div class="err-banner" id="errBanner">
-    <span>⚠</span><span id="errMsg"></span>
-  </div>
-
   <!-- Positions -->
   <div class="sect-label">Positions</div>
   <div class="pos-list" id="posList"></div>
@@ -921,9 +900,7 @@ body::after {
 'use strict';
 
 /* ── Config ─────────────────────────────────────────────── */
-const AV_KEY   = 'ILDUU7WG6MWRTF25';
-const AV_BASE  = 'https://www.alphavantage.co/query';
-const CACHE_MS = 15 * 60 * 1000; // 15 minutes — preserves 25 req/day limit
+const CACHE_MS = 15 * 60 * 1000; // 15 minutes
 
 const SB_URL = 'https://rsoobyusmktmoewlcjnq.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzb29ieXVzbWt0bW9ld2xjam5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5ODE2MDgsImV4cCI6MjA5NTU1NzYwOH0.erJXvbrZclXGVRAOp52cBD4Dzp6_BDiKyF0MupsBT1g';
@@ -980,7 +957,6 @@ function esc(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
-function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
 
 /* ── Positions — localStorage ────────────────────────────── */
 function positionsLoad() {
@@ -1046,24 +1022,17 @@ async function supaSave() {
   } catch (_) {}
 }
 
-/* ── Alpha Vantage ───────────────────────────────────────── */
+/* ── Yahoo Finance (via /api/quote proxy) ────────────────── */
 async function fetchSymbol(sym) {
-  var url = AV_BASE + '?function=GLOBAL_QUOTE&symbol=' + sym + '&apikey=' + AV_KEY;
-  var res = await fetch(url);
+  var res = await fetch('/api/quote?symbol=' + encodeURIComponent(sym));
   if (!res.ok) throw new Error('HTTP ' + res.status);
-  var json = await res.json();
-  if (json.Note || json.Information) {
-    var e = new Error(json.Note || json.Information);
-    e.rateLimited = true;
-    throw e;
-  }
-  var q = json['Global Quote'];
-  if (!q || !q['05. price']) throw new Error('No data for ' + sym);
+  var data = await res.json();
+  if (data.error) throw new Error(data.error);
   return {
-    price:         parseFloat(q['05. price']),
-    change:        parseFloat(q['09. change']),
-    changePercent: parseFloat((q['10. change percent'] || '0').replace('%', '')),
-    prevClose:     parseFloat(q['08. previous close']),
+    price:         data.price,
+    change:        data.change,
+    changePercent: data.changePercent,
+    prevClose:     data.prevClose,
     fetchedAt:     Date.now()
   };
 }
@@ -1080,29 +1049,13 @@ async function fetchAll(force) {
 
   busy = true;
   setLoading(true);
-  hideError();
 
-  var errs = [];
-  var rateLimited = false;
-
-  for (var i = 0; i < positions.length; i++) {
-    var sym = positions[i].symbol;
-    if (rateLimited) { errs.push(sym); continue; }
-    try {
-      cache[sym] = await fetchSymbol(sym);
-    } catch (e) {
-      errs.push(sym);
-      if (e.rateLimited) rateLimited = true;
-    }
-    if (i < positions.length - 1 && !rateLimited) await sleep(220);
-  }
-
-  if (errs.length) {
-    var msg = rateLimited
-      ? 'API rate limit reached (25 req/day free tier). Showing cached data. Try again later.'
-      : 'Could not load: ' + errs.join(', ') + '. Showing cached data where available.';
-    showError(msg);
-  }
+  // Fetch all symbols in parallel; failures leave the cached price intact
+  await Promise.allSettled(
+    positions.map(function(p) {
+      return fetchSymbol(p.symbol).then(function(q) { cache[p.symbol] = q; });
+    })
+  );
 
   cacheSave();
   await supaSave();
@@ -1117,13 +1070,6 @@ function setLoading(on) {
   var icon = document.getElementById('refreshIcon');
   btn.disabled = on;
   icon.classList.toggle('spin', on);
-}
-function showError(msg) {
-  document.getElementById('errMsg').textContent = msg;
-  document.getElementById('errBanner').classList.add('show');
-}
-function hideError() {
-  document.getElementById('errBanner').classList.remove('show');
 }
 
 /* ── Allocation chart helpers ────────────────────────────── */
@@ -1590,7 +1536,7 @@ async function init() {
   renderAll();           // render from localStorage immediately
   await supaInit();
   renderAll();           // re-render after merging Supabase data
-  await fetchAll(false); // only hits AV if cache is stale
+  await fetchAll(false); // skipped if cache is fresh
 }
 
 init();
