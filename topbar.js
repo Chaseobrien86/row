@@ -2,7 +2,7 @@
 // Global bottom navigation bar.
 // Drop this on any page with:
 //     <script src="topbar.js" defer></script>
-// Self-injects a fixed 5-tab bottom nav: Main · Water · Stack · Gym · Finance
+// Self-injects a fixed 6-tab bottom nav: Main · Water · Stack · Sleep · Gym · Finance
 // =============================================================
 (function () {
   'use strict';
@@ -92,6 +92,7 @@ html, body { -webkit-text-size-adjust: 100%; }
   <a href="index.html"   class="bn-tab" data-page="main"    >Main</a>
   <a href="water.html"   class="bn-tab" data-page="water"   >Water</a>
   <a href="health.html"  class="bn-tab" data-page="health"  >Stack</a>
+  <a href="sleep.html"   class="bn-tab" data-page="sleep"   >Sleep</a>
   <a href="gym.html"     class="bn-tab" data-page="gym"     >Gym</a>
   <a href="finance.html" class="bn-tab" data-page="finance" >Finance</a>
 </nav>
