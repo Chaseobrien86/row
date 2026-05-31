@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#050506">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Portfolio</title>
@@ -10,841 +10,388 @@
 <script src="topbar.js" defer></script>
 <style>
 :root {
-  --bg: #050506;
-  --bg-card: rgba(255, 255, 255, 0.04);
-  --border: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.12);
-  --text-primary: #FAFAFA;
-  --text-secondary: #B8B6B0;
-  --text-tertiary: #76746E;
-  --text-quaternary: #4D4B47;
-  --success: #6BE3A4;
-  --danger: #FF6B6B;
-  --warning: #F2C063;
-  --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --bg:       #050506;
+  --card-bg:  rgba(255,255,255,0.04);
+  --border:   rgba(255,255,255,0.07);
+  --border-hi:rgba(255,255,255,0.13);
+  --text-1:   #FAFAFA;
+  --text-2:   #B8B6B0;
+  --text-3:   #76746E;
+  --text-4:   #4D4B47;
+  --green:    #6BE3A4;
+  --red:      #FF6B6B;
+  --yellow:   #F2C063;
+  --font:     -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  --mono:     ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
-  background: var(--bg);
-  color: var(--text-secondary);
-  font-family: var(--font);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  min-height: 100vh;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{
+  background:var(--bg);color:var(--text-2);
+  font-family:var(--font);-webkit-font-smoothing:antialiased;
+  min-height:100vh;overflow-x:hidden;
+  scrollbar-width:none;-ms-overflow-style:none;
 }
-*::-webkit-scrollbar { display: none; }
-body {
-  padding: max(24px, env(safe-area-inset-top)) 16px 16px;
-  position: relative;
-  overflow-x: hidden;
+*::-webkit-scrollbar{display:none;}
+body{
+  padding:max(24px,env(safe-area-inset-top)) 16px 16px;
+  position:relative;
 }
-body::before {
-  content: '';
-  position: fixed; inset: -10%;
-  z-index: -2;
+body::before{
+  content:'';position:fixed;inset:-10%;z-index:-2;
   background:
-    radial-gradient(60% 50% at 80% 10%, rgba(224, 118, 88, 0.14) 0%, transparent 55%),
-    radial-gradient(50% 45% at 20% 88%, rgba(107, 227, 164, 0.07) 0%, transparent 55%);
-  filter: blur(40px);
-  pointer-events: none;
+    radial-gradient(60% 50% at 78% 10%,rgba(224,118,88,.14) 0%,transparent 55%),
+    radial-gradient(50% 45% at 20% 88%,rgba(107,227,164,.07) 0%,transparent 55%);
+  filter:blur(40px);pointer-events:none;
 }
-body::after {
-  content: '';
-  position: fixed; inset: 0;
-  z-index: -1;
-  background-image: radial-gradient(rgba(255,255,255,0.014) 1px, transparent 1px);
-  background-size: 3px 3px;
-  pointer-events: none;
+body::after{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background-image:radial-gradient(rgba(255,255,255,.014) 1px,transparent 1px);
+  background-size:3px 3px;pointer-events:none;
 }
 
-.page { max-width: 680px; margin: 0 auto; }
+.page{max-width:680px;margin:0 auto;}
 
 /* ── Header ── */
-.port-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 24px;
+.hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:22px;}
+.hdr-left{}
+.hdr-eyebrow{font:700 10px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px;}
+.hdr-total{
+  font-size:38px;font-weight:800;letter-spacing:-.04em;
+  font-variant-numeric:tabular-nums;line-height:1;
+  background:linear-gradient(180deg,#fff 0%,#C7C4BC 120%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
 }
-.port-eyebrow {
-  font: 700 10px/1 var(--font-mono);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  margin-bottom: 9px;
+.hdr-today{margin-top:7px;font:600 13px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--text-3);}
+.hdr-today.pos{color:var(--green);}
+.hdr-today.neg{color:var(--red);}
+.hdr-meta{margin-top:4px;font:400 11px/1 var(--mono);color:var(--text-4);}
+.hdr-btns{display:flex;flex-direction:column;gap:8px;flex-shrink:0;}
+.btn-icon{
+  display:flex;align-items:center;gap:7px;
+  padding:10px 15px;border:1px solid var(--border-hi);border-radius:12px;
+  background:var(--card-bg);color:var(--text-2);
+  font:700 11px/1 var(--font);letter-spacing:.07em;text-transform:uppercase;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+  transition:background .15s,color .15s,transform .1s;white-space:nowrap;
 }
-.port-total {
-  font-size: 40px;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  background: linear-gradient(180deg, #FFFFFF 0%, #C7C4BC 120%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-}
-.port-today {
-  margin-top: 8px;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-tertiary);
-  transition: color 0.3s;
-}
-.port-today.c-pos { color: var(--success); }
-.port-today.c-neg { color: var(--danger); }
-.port-meta {
-  margin-top: 5px;
-  font-size: 11px;
-  color: var(--text-quaternary);
-  font-family: var(--font-mono);
-}
+.btn-icon:hover{background:rgba(255,255,255,.07);color:var(--text-1);}
+.btn-icon:active{transform:scale(.97);}
+.btn-icon:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.spin-icon{display:inline-block;font-size:15px;line-height:1;}
+.spin-icon.spinning{animation:spin .9s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-/* ── Header button group ── */
-.header-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-  flex-shrink: 0;
+/* ── Error banner ── */
+.err-banner{
+  display:none;align-items:center;gap:10px;
+  padding:10px 14px;margin-bottom:14px;
+  background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.22);
+  border-radius:12px;font:500 12px/1.5 var(--mono);color:#FF9999;
 }
-.refresh-btn, .edit-btn {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 10px 16px;
-  border: 1px solid var(--border-strong);
-  border-radius: 12px;
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  font-family: var(--font);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
-  transition: background 0.15s, color 0.15s, transform 0.1s;
-  white-space: nowrap;
-}
-.refresh-btn:hover, .edit-btn:hover { background: rgba(255,255,255,0.07); color: var(--text-primary); }
-.refresh-btn:active, .edit-btn:active { transform: scale(0.97); }
-.refresh-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
-.refresh-icon { font-size: 16px; line-height: 1; display: inline-block; }
-.refresh-icon.spin { animation: spin 0.9s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.err-banner.show{display:flex;}
 
 /* ── Section label ── */
-.sect-label {
-  font: 700 10px/1 var(--font-mono);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+.sect{
+  font:700 10px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;
+  color:var(--text-3);display:flex;align-items:center;gap:10px;
+  margin:20px 0 10px;
 }
-.sect-label::before {
-  content: '';
-  width: 16px; height: 1px;
-  background: var(--text-tertiary);
-  opacity: 0.5;
-}
-.sect-label::after {
-  content: ''; flex: 1; height: 1px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.07), transparent);
-}
-
+.sect::before{content:'';width:16px;height:1px;background:var(--text-3);opacity:.5;}
+.sect::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.07),transparent);}
 
 /* ── Position cards ── */
-.pos-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 22px;
+.pos-list{display:flex;flex-direction:column;gap:8px;margin-bottom:6px;}
+.pos-card{
+  background:var(--card-bg);border:1px solid var(--border);border-radius:16px;
+  padding:15px 16px;
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 4px 20px rgba(0,0,0,.28);
+  position:relative;overflow:hidden;transition:background .15s;
 }
-.pos-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 16px 18px;
-  backdrop-filter: blur(24px) saturate(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.05),
-    0 4px 24px rgba(0,0,0,0.32);
-  transition: background 0.15s;
-  position: relative;
-  overflow: hidden;
+.pos-card:hover{background:rgba(255,255,255,.055);}
+.pos-card::before{
+  content:'';position:absolute;left:0;top:12px;bottom:12px;
+  width:3px;border-radius:0 2px 2px 0;
+  background:var(--border-hi);transition:background .4s,box-shadow .4s;
 }
-.pos-card:hover { background: rgba(255,255,255,0.055); }
-.pos-card::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 14px; bottom: 14px;
-  width: 3px;
-  border-radius: 0 2px 2px 0;
-  background: var(--border-strong);
-  transition: background 0.4s, box-shadow 0.4s;
-}
-.pos-card.perf-pos::before {
-  background: var(--success);
-  box-shadow: 0 0 10px rgba(107,227,164,0.45);
-}
-.pos-card.perf-neg::before {
-  background: var(--danger);
-  box-shadow: 0 0 10px rgba(255,107,107,0.45);
-}
-.pos-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.pos-symbol {
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  color: var(--text-primary);
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.pos-name {
-  font-size: 11px;
-  color: var(--text-tertiary);
-  margin-top: 4px;
-  line-height: 1.3;
-}
-.pos-price-col { text-align: right; flex-shrink: 0; }
-.pos-price {
-  font-size: 20px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.025em;
-  color: var(--text-primary);
-  line-height: 1;
-}
-.pos-day {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-variant-numeric: tabular-nums;
-  margin-top: 4px;
-  color: var(--text-tertiary);
-}
-.pos-bottom {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 8px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-.pos-meta {
-  font-size: 11px;
-  color: var(--text-tertiary);
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  line-height: 1.6;
-}
-.pos-meta b { color: var(--text-secondary); font-weight: 600; }
-.pos-value-col { text-align: right; }
-.pos-total-val {
-  font-family: var(--font-mono);
-  font-size: 15px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
-  line-height: 1;
-}
-.pos-gl {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-  margin-top: 3px;
-}
+.pos-card.up::before{background:var(--green);box-shadow:0 0 8px rgba(107,227,164,.4);}
+.pos-card.dn::before{background:var(--red);box-shadow:0 0 8px rgba(255,107,107,.4);}
+.pos-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.pos-sym{font:800 16px/1 var(--font);letter-spacing:.02em;color:var(--text-1);}
+.pos-name{font:400 11px/1 var(--font);color:var(--text-3);margin-top:3px;}
+.pos-price-col{text-align:right;flex-shrink:0;}
+.pos-price{font:700 19px/1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:var(--text-1);}
+.pos-day{font:600 11px/1 var(--mono);font-variant-numeric:tabular-nums;margin-top:3px;color:var(--text-3);}
+.pos-day.pos{color:var(--green);}
+.pos-day.neg{color:var(--red);}
+.pos-bot{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;padding-top:10px;border-top:1px solid var(--border);}
+.pos-meta{font:500 11px/1.6 var(--mono);font-variant-numeric:tabular-nums;color:var(--text-3);}
+.pos-meta b{color:var(--text-2);font-weight:600;}
+.pos-val-col{text-align:right;}
+.pos-total{font:700 14px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--text-1);}
+.pos-gl{font:600 11px/1 var(--mono);font-variant-numeric:tabular-nums;margin-top:3px;}
+.pos-gl.pos{color:var(--green);}
+.pos-gl.neg{color:var(--red);}
+.pos-gl.neu{color:var(--text-3);}
+.dash{color:var(--text-4);font-family:var(--mono);}
 
 /* ── Cash row ── */
-.cash-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 15px 18px;
-  margin-bottom: 22px;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.05),
-    0 4px 20px rgba(0,0,0,0.28);
+.cash-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--card-bg);border:1px solid var(--border);border-radius:14px;
+  padding:14px 16px;margin-bottom:6px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 4px 16px rgba(0,0,0,.24);
 }
-.cash-label { font-size: 13px; font-weight: 700; color: var(--text-primary); }
-.cash-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 3px; font-family: var(--font-mono); }
-.cash-amt {
-  font-family: var(--font-mono);
-  font-size: 18px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
-}
+.cash-lbl{font:700 13px/1 var(--font);color:var(--text-1);}
+.cash-sub{font:400 11px/1 var(--mono);color:var(--text-3);margin-top:3px;}
+.cash-amt{font:700 17px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--text-1);}
 
 /* ── Summary card ── */
-.summary-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
-  backdrop-filter: blur(24px) saturate(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.05),
-    0 8px 36px rgba(0,0,0,0.40);
-  margin-bottom: 20px;
+.summ-card{
+  background:var(--card-bg);border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 6px 28px rgba(0,0,0,.35);
+  margin-bottom:6px;
 }
-.summ-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 13px 18px;
+.summ-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;}
+.summ-row+.summ-row{border-top:1px solid var(--border);}
+.summ-row.hero{background:rgba(255,255,255,.025);padding:15px 16px;}
+.summ-row.hero .summ-lbl{font-size:13px;font-weight:700;color:var(--text-2);}
+.summ-row.hero .summ-val{font-size:18px;}
+.summ-lbl{font:400 12px/1 var(--font);color:var(--text-3);}
+.summ-rhs{text-align:right;}
+.summ-val{font:700 13px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--text-1);}
+.summ-val.pos{color:var(--green);}
+.summ-val.neg{color:var(--red);}
+.summ-hint{font:400 10px/1 var(--mono);color:var(--text-4);margin-top:2px;}
+
+/* ── Allocation donut ── */
+.alloc-card{
+  background:var(--card-bg);border:1px solid var(--border);border-radius:16px;
+  padding:18px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 4px 20px rgba(0,0,0,.28);
+  margin-bottom:6px;
 }
-.summ-row + .summ-row { border-top: 1px solid var(--border); }
-.summ-row.total { background: rgba(255,255,255,0.025); padding: 16px 18px; }
-.summ-row.total .summ-label { font-size: 13px; font-weight: 700; color: var(--text-secondary); }
-.summ-row.total .summ-val { font-size: 20px; }
-.summ-label { font-size: 12px; color: var(--text-tertiary); }
-.summ-rhs { text-align: right; }
-.summ-val {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
+.alloc-layout{display:flex;align-items:center;gap:24px;}
+.alloc-chart-wrap{position:relative;width:160px;height:160px;flex-shrink:0;}
+#allocSvg{width:100%;height:100%;display:block;overflow:visible;}
+.alloc-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;pointer-events:none;text-align:center;
 }
-.summ-hint { font-size: 10px; color: var(--text-quaternary); font-family: var(--font-mono); margin-top: 2px; }
-
-/* ── Colour utilities ── */
-.c-pos { color: var(--success) !important; }
-.c-neg { color: var(--danger)  !important; }
-.c-neu { color: var(--text-tertiary) !important; }
-
-
-.ndash { color: var(--text-quaternary); font-family: var(--font-mono); }
-
-/* ════════════════════════════════════════
-   EDIT HOLDINGS MODAL
-   ════════════════════════════════════════ */
-
-/* Backdrop */
-.modal-overlay {
-  position: fixed; inset: 0;
-  z-index: 500;
-  background: rgba(0, 0, 0, 0.70);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.24s ease;
+.alloc-center-lbl{font:700 9px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);margin-bottom:4px;}
+.alloc-center-val{font:700 15px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--text-1);}
+.alloc-center-pct{font:600 10px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--text-3);margin-top:3px;min-height:13px;}
+.alloc-legend{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.alloc-row{
+  display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;
+  cursor:pointer;transition:background .12s;min-width:0;
 }
-.modal-overlay.is-open {
-  opacity: 1;
-  pointer-events: all;
+.alloc-row:hover{background:rgba(255,255,255,.05);}
+.alloc-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.alloc-sym{font:700 12px/1 var(--mono);color:var(--text-1);letter-spacing:.03em;flex-shrink:0;width:42px;}
+.alloc-pct{font:600 12px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--text-2);flex-shrink:0;width:40px;}
+.alloc-name{font:400 11px/1 var(--font);color:var(--text-4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.alloc-tip{
+  position:fixed;z-index:900;
+  background:rgba(14,14,18,.96);border:1px solid var(--border-hi);
+  border-radius:10px;padding:10px 13px;pointer-events:none;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:0 6px 24px rgba(0,0,0,.55);min-width:140px;
+}
+@media(max-width:520px){
+  .alloc-layout{flex-direction:column;align-items:center;}
+  .alloc-legend{width:100%;}
+  .alloc-name{display:none;}
 }
 
-/* Panel — slides up from bottom on mobile */
-.edit-panel {
-  width: 100%;
-  max-width: 580px;
-  max-height: 88vh;
-  display: flex;
-  flex-direction: column;
-  background: #0E0E10;
-  border: 1px solid var(--border-strong);
-  border-bottom: none;
-  border-radius: 22px 22px 0 0;
-  overflow: hidden;
-  box-shadow: 0 -12px 60px rgba(0,0,0,0.70);
-  transform: translateY(100%);
-  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+/* ═══════════════ EDIT MODAL ═══════════════ */
+.modal-bg{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.70);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .22s;
 }
-.modal-overlay.is-open .edit-panel {
-  transform: translateY(0);
+.modal-bg.open{opacity:1;pointer-events:all;}
+.modal-panel{
+  width:100%;max-width:560px;max-height:88vh;
+  display:flex;flex-direction:column;
+  background:#0E0E10;border:1px solid var(--border-hi);
+  border-bottom:none;border-radius:22px 22px 0 0;
+  overflow:hidden;box-shadow:0 -12px 60px rgba(0,0,0,.7);
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);
 }
+.modal-bg.open .modal-panel{transform:translateY(0);}
+@media(min-width:600px){
+  .modal-bg{align-items:center;padding:20px;}
+  .modal-panel{border-radius:20px;border-bottom:1px solid var(--border-hi);transform:translateY(12px) scale(.98);opacity:0;transition:transform .26s cubic-bezier(.22,1,.36,1),opacity .2s;}
+  .modal-bg.open .modal-panel{transform:translateY(0) scale(1);opacity:1;}
+}
+.modal-grip{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.18);margin:10px auto 0;flex-shrink:0;}
+@media(min-width:600px){.modal-grip{display:none;}}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.modal-title{font:700 15px/1 var(--font);color:var(--text-1);}
+.modal-x{
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  border:none;border-radius:8px;background:rgba(255,255,255,.06);
+  color:var(--text-2);font-size:20px;line-height:1;cursor:pointer;
+  transition:background .15s;
+}
+.modal-x:hover{background:rgba(255,255,255,.12);color:var(--text-1);}
+.modal-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 14px 4px;display:flex;flex-direction:column;gap:8px;}
+.modal-ft{flex-shrink:0;padding:12px 14px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:#0E0E10;display:flex;flex-direction:column;gap:8px;}
+.modal-note{font:400 10.5px/1 var(--mono);color:var(--text-4);text-align:center;}
+.modal-actions{display:flex;gap:8px;}
+.btn-cancel{
+  flex:1;padding:13px;border:1px solid var(--border-hi);border-radius:12px;
+  background:transparent;color:var(--text-2);
+  font:700 13px/1 var(--font);cursor:pointer;transition:background .15s;
+}
+.btn-cancel:hover{background:rgba(255,255,255,.05);color:var(--text-1);}
+.btn-save{
+  flex:2;padding:13px;border:none;border-radius:12px;
+  background:linear-gradient(180deg,#fff 0%,#E8E5DD 100%);
+  color:#0A0A0B;font:700 13px/1 var(--font);cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 10px rgba(0,0,0,.4);
+  transition:filter .15s,transform .1s;
+}
+.btn-save:hover{filter:brightness(1.05);}
+.btn-save:active{transform:scale(.98);}
+.btn-save:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-add{
+  width:100%;padding:11px;border:1px dashed var(--border-hi);border-radius:12px;
+  background:transparent;color:var(--text-3);
+  font:700 11px/1 var(--font);letter-spacing:.07em;text-transform:uppercase;cursor:pointer;
+  transition:color .15s,border-color .15s,background .15s;
+}
+.btn-add:hover{color:var(--text-1);border-color:rgba(255,255,255,.28);border-style:solid;background:rgba(255,255,255,.03);}
 
-/* Desktop: centred dialog instead of bottom sheet */
-@media (min-width: 620px) {
-  .modal-overlay { align-items: center; padding: 24px; }
-  .edit-panel {
-    border-radius: 20px;
-    border-bottom: 1px solid var(--border-strong);
-    max-height: 82vh;
-    transform: translateY(16px) scale(0.98);
-    opacity: 0;
-    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
-  }
-  .modal-overlay.is-open .edit-panel {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
+/* Edit row */
+.edit-row{
+  background:rgba(255,255,255,.035);border:1px solid var(--border);
+  border-radius:13px;padding:12px 13px;display:flex;flex-direction:column;gap:8px;
+  animation:rowIn .18s ease;
 }
+@keyframes rowIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.edit-top{display:flex;align-items:center;gap:8px;}
+.edit-bot{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;}
+.edit-field{display:flex;flex-direction:column;gap:3px;}
+.edit-field-lbl{font:800 9px/1 var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--text-4);padding-left:2px;}
+.edit-inp,.edit-sel{
+  background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.10);
+  border-radius:9px;color:var(--text-1);
+  font:600 14px/1 var(--font);padding:8px 10px;outline:none;
+  transition:border-color .15s,background .15s;
+}
+.edit-inp:focus,.edit-sel:focus{border-color:rgba(255,255,255,.28);background:rgba(0,0,0,.55);}
+.edit-inp::placeholder{color:var(--text-4);}
+.edit-inp[type="number"]{-moz-appearance:textfield;}
+.edit-inp[type="number"]::-webkit-outer-spin-button,
+.edit-inp[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.inp-sym{width:80px;font-family:var(--mono);font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;}
+.inp-name{flex:1;min-width:0;}
+.inp-shares{width:80px;font-family:var(--mono);}
+.edit-sel{
+  width:84px;cursor:pointer;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2376746E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;
+  color-scheme:dark;
+}
+.edit-sel option{background:#1A1A1D;}
+.edit-del{
+  flex-shrink:0;margin-left:auto;width:30px;height:30px;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,107,107,.2);border-radius:8px;
+  background:rgba(255,107,107,.06);color:var(--red);font-size:16px;
+  cursor:pointer;opacity:.65;transition:opacity .15s,background .15s,border-color .15s;
+}
+.edit-del:hover{opacity:1;background:rgba(255,107,107,.14);border-color:rgba(255,107,107,.38);}
 
-/* Drag handle pill (mobile only) */
-.modal-handle {
-  width: 36px; height: 4px;
-  border-radius: 2px;
-  background: rgba(255,255,255,0.18);
-  margin: 10px auto 0;
-  flex-shrink: 0;
-}
-@media (min-width: 620px) { .modal-handle { display: none; } }
-
-/* Modal header */
-.modal-hd {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 20px 14px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.modal-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-.modal-close {
-  width: 30px; height: 30px;
-  display: flex; align-items: center; justify-content: center;
-  border: none;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.06);
-  color: var(--text-secondary);
-  font-size: 20px;
-  line-height: 1;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.15s, color 0.15s;
-}
-.modal-close:hover { background: rgba(255,255,255,0.12); color: var(--text-primary); }
-
-/* Scrollable body */
-.modal-body {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 12px 16px 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* Modal footer */
-.modal-ft {
-  flex-shrink: 0;
-  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: #0E0E10;
-}
-.modal-note {
-  font-size: 10.5px;
-  color: var(--text-quaternary);
-  font-family: var(--font-mono);
-  text-align: center;
-  letter-spacing: 0.03em;
-}
-.modal-actions {
-  display: flex;
-  gap: 8px;
-}
-.modal-cancel {
-  flex: 1;
-  padding: 13px;
-  border: 1px solid var(--border-strong);
-  border-radius: 12px;
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.15s, color 0.15s;
-}
-.modal-cancel:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
-.modal-save {
-  flex: 2;
-  padding: 13px;
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #FFFFFF 0%, #E8E5DD 100%);
-  color: #0A0A0B;
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 10px rgba(0,0,0,0.40);
-  transition: filter 0.15s, transform 0.1s;
-}
-.modal-save:hover { filter: brightness(1.06); }
-.modal-save:active { transform: scale(0.98); }
-.modal-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-/* Add position button */
-.add-pos-btn {
-  width: 100%;
-  padding: 11px;
-  border: 1px dashed var(--border-strong);
-  border-radius: 12px;
-  background: transparent;
-  color: var(--text-tertiary);
-  font-family: var(--font);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
-}
-.add-pos-btn:hover {
-  color: var(--text-primary);
-  border-color: rgba(255,255,255,0.28);
-  border-style: solid;
-  background: rgba(255,255,255,0.03);
-}
-
-/* ── Per-position edit row ── */
-.edit-row {
-  background: rgba(255,255,255,0.035);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  animation: rowIn 0.2s ease;
-}
-@keyframes rowIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Row top: symbol + delete */
-.edit-row-top {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-/* Row bottom: shares, avg cost, term */
-.edit-row-bot {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: flex-end;
-}
-
-/* Labeled field wrapper */
-.edit-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.edit-field-label {
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--text-quaternary);
-  font-family: var(--font-mono);
-  padding-left: 2px;
-}
-
-/* Base input style */
-.edit-input, .edit-select {
-  background: rgba(0, 0, 0, 0.40);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 9px;
-  color: var(--text-primary);
-  font-family: var(--font);
-  font-size: 14px;
-  font-weight: 600;
-  padding: 8px 10px;
-  outline: none;
-  transition: border-color 0.15s, background 0.15s;
-}
-.edit-input:focus, .edit-select:focus {
-  border-color: rgba(255,255,255,0.28);
-  background: rgba(0,0,0,0.55);
-}
-.edit-input::placeholder { color: var(--text-quaternary); }
-/* Hide number spinners */
-.edit-input[type="number"] { -moz-appearance: textfield; }
-.edit-input[type="number"]::-webkit-outer-spin-button,
-.edit-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-
-/* Individual input sizing */
-.inp-sym  {
-  width: 88px;
-  font-family: var(--font-mono);
-  font-weight: 800;
-  font-size: 14px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-.inp-name  { flex: 1; min-width: 0; }
-.inp-shares { width: 88px; font-family: var(--font-mono); }
-.edit-select {
-  width: 88px;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2376746E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-right: 26px;
-  color-scheme: dark;
-}
-.edit-select option { background: #1A1A1D; }
-
-/* Delete button */
-.edit-delete {
-  flex-shrink: 0;
-  margin-left: auto;
-  width: 32px; height: 32px;
-  display: flex; align-items: center; justify-content: center;
-  border: 1px solid rgba(255,107,107,0.18);
-  border-radius: 9px;
-  background: rgba(255,107,107,0.06);
-  color: var(--danger);
-  font-size: 16px;
-  line-height: 1;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  opacity: 0.65;
-  transition: opacity 0.15s, background 0.15s, border-color 0.15s;
-}
-.edit-delete:hover {
-  opacity: 1;
-  background: rgba(255,107,107,0.14);
-  border-color: rgba(255,107,107,0.38);
-}
-
-/* ── Allocation donut chart ── */
-.alloc-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 20px;
-  backdrop-filter: blur(24px) saturate(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 24px rgba(0,0,0,0.32);
-  margin-bottom: 20px;
-}
-.alloc-note {
-  font: 600 11px/1 var(--font-mono);
-  color: var(--text-quaternary);
-  letter-spacing: 0.04em;
-  margin-bottom: 14px;
-  padding: 7px 10px;
-  background: rgba(242,192,99,0.06);
-  border: 1px solid rgba(242,192,99,0.14);
-  border-radius: 8px;
-}
-.alloc-layout {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-}
-.alloc-chart-wrap {
-  position: relative;
-  width: 180px;
-  height: 180px;
-  flex-shrink: 0;
-}
-#allocSvg { width: 100%; height: 100%; display: block; overflow: visible; }
-.alloc-center {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  pointer-events: none; text-align: center;
-  padding: 8px;
-}
-.alloc-center-label {
-  font: 700 9px/1 var(--font-mono);
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--text-tertiary); margin-bottom: 5px;
-  transition: color 0.15s;
-}
-.alloc-center-val {
-  font: 700 16px/1 var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em; color: var(--text-primary);
-}
-.alloc-center-pct {
-  font: 600 11px/1 var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-tertiary); margin-top: 3px;
-  min-height: 14px;
-}
-.alloc-legend {
-  flex: 1; min-width: 0;
-  display: flex; flex-direction: column; gap: 3px;
-}
-.alloc-leg-row {
-  display: flex; align-items: center; gap: 9px;
-  padding: 6px 8px; border-radius: 8px; cursor: pointer;
-  transition: background 0.12s; min-width: 0;
-}
-.alloc-leg-row:hover { background: rgba(255,255,255,0.05); }
-.alloc-dot {
-  width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0;
-}
-.alloc-sym {
-  font: 700 12px/1 var(--font-mono);
-  color: var(--text-primary); letter-spacing: 0.04em;
-  flex-shrink: 0; width: 46px;
-}
-.alloc-pct {
-  font: 600 12px/1 var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary); flex-shrink: 0; width: 44px;
-}
-.alloc-name {
-  font: 400 11px/1 var(--font); color: var(--text-quaternary);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
-}
-.alloc-tooltip {
-  position: fixed; z-index: 900;
-  background: rgba(14, 14, 18, 0.96);
-  border: 1px solid var(--border-strong);
-  border-radius: 10px; padding: 10px 14px;
-  pointer-events: none;
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.55);
-  min-width: 150px;
-}
-@media (max-width: 560px) {
-  .alloc-layout { flex-direction: column; align-items: center; }
-  .alloc-chart-wrap { width: 160px; height: 160px; }
-  .alloc-legend { width: 100%; }
-  .alloc-name { display: none; }
-}
-
-/* ── Mobile tweaks ── */
-@media (max-width: 480px) {
-  .port-total { font-size: 32px; }
-  .pos-price  { font-size: 17px; }
-  .pos-total-val { font-size: 13px; }
-  .summ-row.total .summ-val { font-size: 16px; }
-  .cash-amt { font-size: 16px; }
-  .inp-sym    { width: 76px; }
-  .inp-shares { width: 76px; }
-  .edit-select { width: 76px; }
+@media(max-width:480px){
+  .hdr-total{font-size:30px;}
+  .pos-price{font-size:16px;}
+  .pos-total{font-size:12px;}
+  .summ-row.hero .summ-val{font-size:15px;}
+  .cash-amt{font-size:15px;}
+  .inp-sym{width:68px;}
+  .inp-shares{width:68px;}
+  .edit-sel{width:72px;}
 }
 </style>
 </head>
 <body>
 <div class="page">
 
-  <!-- Header -->
-  <div class="port-header">
-    <div>
-      <div class="port-eyebrow">Merrill Lynch &nbsp;·&nbsp; Portfolio</div>
-      <div class="port-total" id="portTotal">—</div>
-      <div class="port-today" id="portToday">— today</div>
-      <div class="port-meta" id="portMeta">Tap Refresh to load live prices</div>
+  <!-- ── Header ── -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <div class="hdr-eyebrow">Merrill Lynch &nbsp;·&nbsp; Portfolio</div>
+      <div class="hdr-total" id="hdrTotal">—</div>
+      <div class="hdr-today" id="hdrToday">— today</div>
+      <div class="hdr-meta" id="hdrMeta">Tap Refresh to load live prices</div>
     </div>
-    <div class="header-actions">
-      <button class="refresh-btn" id="refreshBtn">
-        <span class="refresh-icon" id="refreshIcon">↻</span>
-        Refresh
+    <div class="hdr-btns">
+      <button class="btn-icon" id="refreshBtn">
+        <span class="spin-icon" id="spinIcon">↻</span> Refresh
       </button>
-      <button class="edit-btn" id="editBtn">
-        ✎ Edit Holdings
-      </button>
+      <button class="btn-icon" id="editBtn">✎ Edit</button>
     </div>
   </div>
 
-  <!-- Positions -->
-  <div class="sect-label">Positions</div>
+  <!-- Error banner (only shown if ALL fetches fail) -->
+  <div class="err-banner" id="errBanner">
+    <span>⚠</span><span id="errMsg"></span>
+  </div>
+
+  <!-- ── Positions ── -->
+  <div class="sect">Positions</div>
   <div class="pos-list" id="posList"></div>
 
-  <!-- Cash -->
-  <div class="sect-label">Cash</div>
+  <!-- ── Cash ── -->
+  <div class="sect">Cash</div>
   <div class="cash-row">
-    <div>
-      <div class="cash-label">Cash &amp; Equivalents</div>
-      <div class="cash-sub">FDIC Insured · Merrill Lynch</div>
-    </div>
+    <div><div class="cash-lbl">Cash &amp; Equivalents</div><div class="cash-sub">FDIC Insured · Merrill Lynch</div></div>
     <div class="cash-amt">$7,894.09</div>
   </div>
 
-  <!-- Summary -->
-  <div class="sect-label">Summary</div>
-  <div class="summary-card">
-    <div class="summ-row total">
-      <div class="summ-label">Total Portfolio Value</div>
-      <div class="summ-rhs"><div class="summ-val" id="summTotal">—</div></div>
+  <!-- ── Summary ── -->
+  <div class="sect">Summary</div>
+  <div class="summ-card">
+    <div class="summ-row hero">
+      <div class="summ-lbl">Total Portfolio Value</div>
+      <div class="summ-rhs"><div class="summ-val" id="sTotal">—</div></div>
     </div>
     <div class="summ-row">
-      <div class="summ-label">Today's P&amp;L</div>
-      <div class="summ-rhs"><div class="summ-val" id="summToday">—</div></div>
+      <div class="summ-lbl">Today's P&amp;L</div>
+      <div class="summ-rhs"><div class="summ-val" id="sToday">—</div></div>
     </div>
     <div class="summ-row">
-      <div class="summ-label">Total Unrealized G/L</div>
-      <div class="summ-rhs"><div class="summ-val" id="summGl">—</div></div>
+      <div class="summ-lbl">Total Unrealized G/L</div>
+      <div class="summ-rhs"><div class="summ-val" id="sGl">—</div></div>
     </div>
     <div class="summ-row">
-      <div class="summ-label">Short-term G/L</div>
-      <div class="summ-rhs">
-        <div class="summ-val" id="summStGl">—</div>
-        <div class="summ-hint">held &lt; 1 year</div>
-      </div>
+      <div class="summ-lbl">Short-term G/L</div>
+      <div class="summ-rhs"><div class="summ-val" id="sStGl">—</div><div class="summ-hint">held &lt; 1 year</div></div>
     </div>
     <div class="summ-row">
-      <div class="summ-label">Long-term G/L</div>
-      <div class="summ-rhs">
-        <div class="summ-val" id="summLtGl">—</div>
-        <div class="summ-hint">held &gt; 1 year</div>
-      </div>
+      <div class="summ-lbl">Long-term G/L</div>
+      <div class="summ-rhs"><div class="summ-val" id="sLtGl">—</div><div class="summ-hint">held &gt; 1 year</div></div>
     </div>
   </div>
 
-  <!-- Allocation -->
-  <div class="sect-label">Allocation</div>
+  <!-- ── Allocation ── -->
+  <div class="sect">Allocation</div>
   <div class="alloc-card">
-    <div class="alloc-note" id="allocNote" style="display:none;">Based on cost basis — tap Refresh to load live prices</div>
     <div class="alloc-layout">
       <div class="alloc-chart-wrap">
         <svg id="allocSvg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="alloc-center">
-          <div class="alloc-center-label" id="allocLabel">Portfolio</div>
-          <div class="alloc-center-val" id="allocCenterVal">—</div>
-          <div class="alloc-center-pct" id="allocCenterPct"></div>
+          <div class="alloc-center-lbl" id="acLabel">Portfolio</div>
+          <div class="alloc-center-val"  id="acVal">—</div>
+          <div class="alloc-center-pct"  id="acPct"></div>
         </div>
       </div>
       <div class="alloc-legend" id="allocLegend"></div>
@@ -853,165 +400,146 @@ body::after {
 
 </div><!-- /page -->
 
-<!-- Allocation tooltip (fixed, clears overflow:hidden) -->
-<div class="alloc-tooltip" id="allocTooltip" style="display:none;"></div>
+<!-- Floating allocation tooltip -->
+<div class="alloc-tip" id="allocTip" style="display:none;"></div>
 
-<!-- ═══ Edit Holdings Modal ═══ -->
-<div class="modal-overlay" id="editOverlay">
-  <div class="edit-panel" id="editPanel">
-    <div class="modal-handle"></div>
+<!-- ══ Edit Holdings Modal ══ -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal-panel">
+    <div class="modal-grip"></div>
     <div class="modal-hd">
       <span class="modal-title">Edit Holdings</span>
-      <button class="modal-close" id="editClose" aria-label="Close">×</button>
+      <button class="modal-x" id="modalX">×</button>
     </div>
-    <div class="modal-body" id="editBody">
-      <!-- rows injected by JS -->
-    </div>
+    <div class="modal-body" id="modalBody"></div>
     <div class="modal-ft">
-      <button class="add-pos-btn" id="addPosBtn">+ Add Position</button>
-      <p class="modal-note">Prices are auto-fetched — tap Refresh after saving new tickers.</p>
+      <button class="btn-add" id="btnAdd">+ Add Position</button>
+      <p class="modal-note">Avg cost is not shown — update via brokerage. Tap Refresh after adding new tickers.</p>
       <div class="modal-actions">
-        <button class="modal-cancel" id="editCancel">Cancel</button>
-        <button class="modal-save" id="editSave">Save Changes</button>
+        <button class="btn-cancel" id="btnCancel">Cancel</button>
+        <button class="btn-save"   id="btnSave">Save Changes</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-(function () {
+(function(){
 'use strict';
 
-/* ── Config ─────────────────────────────────────────────── */
-const CACHE_MS = 15 * 60 * 1000; // 15 minutes
+/* ─── Constants ──────────────────────────────────────── */
+const CASH    = 7894.09;
+const CACHE_MS = 15 * 60 * 1000;
+const SB_URL  = 'https://rsoobyusmktmoewlcjnq.supabase.co';
+const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzb29ieXVzbWt0bW9ld2xjam5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5ODE2MDgsImV4cCI6MjA5NTU1NzYwOH0.erJXvbrZclXGVRAOp52cBD4Dzp6_BDiKyF0MupsBT1g';
+const SB_ROW  = 'finance_portfolio';
 
-const SB_URL = 'https://rsoobyusmktmoewlcjnq.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzb29ieXVzbWt0bW9ld2xjam5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5ODE2MDgsImV4cCI6MjA5NTU1NzYwOH0.erJXvbrZclXGVRAOp52cBD4Dzp6_BDiKyF0MupsBT1g';
-const SB_ROW = 'finance_portfolio';
-
-const CASH = 7894.09;
-
-/* ── Mutable positions array ─────────────────────────────
-   Supabase / localStorage override these defaults on load.  */
-var positions = [
-  { symbol: 'TQQQ', name: 'ProShares UltraPro QQQ',        shares: 4954, avgCost: 18.57,  term: 'long' },
-  { symbol: 'TSM',  name: 'Taiwan Semiconductor Mfg. Co.', shares: 5,    avgCost: 216.01, term: 'long' },
-  { symbol: 'NLR',  name: 'VanEck Uranium+Nuclear ETF',    shares: 10,   avgCost: 104.84, term: 'long' },
-  { symbol: 'AI',   name: 'C3.ai, Inc.',                   shares: 4,    avgCost: 26.00,  term: 'long' },
-  { symbol: 'QTUM', name: 'Defiance Quantum ETF',          shares: 2,    avgCost: 92.53,  term: 'long' },
-  { symbol: 'MRVL', name: 'Marvell Technology, Inc.',      shares: 1,    avgCost: 69.41,  term: 'long' },
+const ALLOC_COLORS = [
+  '#6EE7B7','#818CF8','#FCD34D','#F87171','#38BDF8',
+  '#F97316','#A78BFA','#FB923C','#34D399','#60A5FA',
 ];
 
-/* ── State ───────────────────────────────────────────────── */
-var cache = {}; // { symbol: { price, change, changePercent, prevClose, fetchedAt } }
+/* ─── Mutable state ──────────────────────────────────── */
+// Positions: stored in Supabase/localStorage, defaulting to hardcoded list
+var positions = [
+  { symbol:'TQQQ', name:'ProShares UltraPro QQQ',        shares:4954, avgCost:18.57,  term:'long' },
+  { symbol:'TSM',  name:'Taiwan Semiconductor Mfg. Co.', shares:5,    avgCost:216.01, term:'long' },
+  { symbol:'NLR',  name:'VanEck Uranium+Nuclear ETF',    shares:10,   avgCost:104.84, term:'long' },
+  { symbol:'AI',   name:'C3.ai Inc.',                    shares:4,    avgCost:26.00,  term:'long' },
+  { symbol:'QTUM', name:'Defiance Quantum ETF',          shares:2,    avgCost:92.53,  term:'long' },
+  { symbol:'MRVL', name:'Marvell Technology Inc.',       shares:1,    avgCost:69.41,  term:'long' },
+];
+
+// Price cache: { SYMBOL: { price, change, changePercent, prevClose, fetchedAt } }
+var cache = {};
 var supa  = null;
 var busy  = false;
 
-/* ── Format helpers ─────────────────────────────────────── */
-function fmt$(n, dp) {
+/* ─── Formatters ─────────────────────────────────────── */
+function f$(n, dp) {
   dp = dp == null ? 2 : dp;
   if (n == null || isNaN(n)) return '—';
-  var s = Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  var s = Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:dp,maximumFractionDigits:dp});
   return (n < 0 ? '-$' : '$') + s;
 }
-function fmtSgn$(n) {
+function fSgn(n) {
   if (n == null || isNaN(n)) return '—';
-  return (n >= 0 ? '+$' : '-$') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (n >= 0 ? '+$' : '-$') + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
-function fmtPct(n) {
+function fPct(n) {
   if (n == null || isNaN(n)) return '';
   return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
 }
-function cCls(n) {
-  if (n == null || isNaN(n)) return 'c-neu';
-  return n > 0 ? 'c-pos' : n < 0 ? 'c-neg' : 'c-neu';
+function cls(n) {
+  if (n == null || isNaN(n)) return 'neu';
+  return n > 0 ? 'pos' : n < 0 ? 'neg' : 'neu';
 }
 function timeAgo(ts) {
   if (!ts) return '';
-  var s = Math.round((Date.now() - ts) / 1000);
-  if (s <  5)  return 'just now';
-  if (s < 60)  return s + 's ago';
-  var m = Math.round(s / 60);
-  if (m < 60)  return m + 'm ago';
-  return Math.round(m / 60) + 'h ago';
+  var s = Math.round((Date.now()-ts)/1000);
+  if (s < 5)  return 'just now';
+  if (s < 60) return s + 's ago';
+  var m = Math.round(s/60);
+  if (m < 60) return m + 'm ago';
+  return Math.round(m/60) + 'h ago';
 }
 function esc(s) {
-  return String(s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-/* ── Positions — localStorage ────────────────────────────── */
-function positionsLoad() {
-  try {
-    var raw = localStorage.getItem('portPositions_v1');
-    if (raw) {
-      var arr = JSON.parse(raw);
-      if (Array.isArray(arr) && arr.length > 0) {
-        positions = arr;
-      }
-    }
-  } catch (_) {}
+/* ─── localStorage ───────────────────────────────────── */
+function posLoad() {
+  try { var r=localStorage.getItem('portPos_v2'); if(r){var a=JSON.parse(r);if(Array.isArray(a)&&a.length)positions=a;} } catch(_){}
 }
-function positionsSave() {
-  try { localStorage.setItem('portPositions_v1', JSON.stringify(positions)); } catch (_) {}
+function posSave() {
+  try { localStorage.setItem('portPos_v2',JSON.stringify(positions)); } catch(_){}
 }
-
-/* ── Price cache — localStorage ──────────────────────────── */
 function cacheLoad() {
-  try {
-    var raw = localStorage.getItem('portPriceCache_v1');
-    if (raw) cache = JSON.parse(raw) || {};
-  } catch (_) {}
+  try { var r=localStorage.getItem('portCache_v2'); if(r) cache=JSON.parse(r)||{}; } catch(_){}
 }
 function cacheSave() {
-  try { localStorage.setItem('portPriceCache_v1', JSON.stringify(cache)); } catch (_) {}
+  try { localStorage.setItem('portCache_v2',JSON.stringify(cache)); } catch(_){}
 }
 
-/* ── Supabase ────────────────────────────────────────────── */
+/* ─── Supabase ───────────────────────────────────────── */
 async function supaInit() {
   if (!window.supabase) return;
   supa = window.supabase.createClient(SB_URL, SB_KEY);
   try {
-    var res = await supa.from('app_state').select('data').eq('key', SB_ROW).maybeSingle();
+    var res = await supa.from('app_state').select('data').eq('key',SB_ROW).maybeSingle();
     if (!res.error && res.data && res.data.data) {
       var d = res.data.data;
-      // Merge price cache (take newer entry per symbol)
       if (d.priceCache) {
         Object.keys(d.priceCache).forEach(function(sym) {
-          var remote = d.priceCache[sym];
-          if (!cache[sym] || remote.fetchedAt > cache[sym].fetchedAt) {
-            cache[sym] = remote;
-          }
+          var r = d.priceCache[sym];
+          if (!cache[sym] || r.fetchedAt > cache[sym].fetchedAt) cache[sym] = r;
         });
         cacheSave();
       }
-      // Override positions if Supabase has them
-      if (Array.isArray(d.positions) && d.positions.length > 0) {
+      if (Array.isArray(d.positions) && d.positions.length) {
         positions = d.positions;
-        positionsSave();
+        posSave();
       }
     }
-  } catch (_) {}
+  } catch(_){}
 }
-
 async function supaSave() {
   if (!supa) return;
   try {
     await supa.from('app_state').upsert(
-      { key: SB_ROW, data: { priceCache: cache, positions: positions }, updated_at: new Date().toISOString() },
-      { onConflict: 'key' }
+      { key:SB_ROW, data:{ priceCache:cache, positions:positions }, updated_at:new Date().toISOString() },
+      { onConflict:'key' }
     );
-  } catch (_) {}
+  } catch(_){}
 }
 
-/* ── Stooq quote proxy — one batch call for all symbols ─────── */
+/* ─── Price fetching ─────────────────────────────────── */
 async function fetchAll(force) {
   if (busy) return;
   if (!force) {
-    var allFresh = positions.every(function(p) {
-      var c = cache[p.symbol];
-      return c && (Date.now() - c.fetchedAt) < CACHE_MS;
+    var allFresh = positions.every(function(p){
+      var c=cache[p.symbol];
+      return c && (Date.now()-c.fetchedAt) < CACHE_MS;
     });
     if (allFresh) { renderAll(); return; }
   }
@@ -1019,36 +547,36 @@ async function fetchAll(force) {
   busy = true;
   setLoading(true);
 
-  var syms = positions.map(function(p) { return p.symbol; }).join(',');
-  console.log('[finance] fetching quotes for:', syms);
+  var syms = positions.map(function(p){ return p.symbol; }).join(',');
+  console.log('[finance] fetching', syms);
   try {
-    // Use comma directly in query string — Vercel decodes %2C correctly but
-    // plain commas also work and avoids any edge-case double-encoding.
     var res  = await fetch('/api/quote?symbols=' + syms);
-    var text = await res.text();
-    console.log('[finance] /api/quote response status:', res.status, 'body:', text.slice(0, 400));
-    var data = JSON.parse(text);
+    var txt  = await res.text();
+    console.log('[finance] api response', res.status, txt.slice(0,500));
+    var data = JSON.parse(txt);
     var now  = Date.now();
+    var got  = 0;
     if (data.quotes) {
       Object.keys(data.quotes).forEach(function(sym) {
         var q = data.quotes[sym];
         if (q && q.price != null) {
-          cache[sym] = {
-            price:         q.price,
-            change:        q.change,
-            changePercent: q.changePercent,
-            prevClose:     q.prevClose,
-            fetchedAt:     now
-          };
-          console.log('[finance] cached', sym, '=', q.price);
+          cache[sym] = { price:q.price, change:q.change, changePercent:q.changePercent, prevClose:q.prevClose, fetchedAt:now };
+          console.log('[finance] cached', sym, q.price);
+          got++;
         }
       });
     }
     if (data.errors && data.errors.length) {
-      console.warn('[finance] API errors:', data.errors);
+      console.warn('[finance] fetch errors:', data.errors);
     }
-  } catch (e) {
-    console.warn('[finance] fetchAll error:', e.message);
+    if (got === 0 && data.errors && data.errors.length === positions.length) {
+      showErr('Could not load prices — ' + data.errors[0]);
+    } else {
+      hideErr();
+    }
+  } catch(e) {
+    console.error('[finance] fetchAll error:', e);
+    showErr('Price fetch failed: ' + e.message);
   }
 
   cacheSave();
@@ -1058,470 +586,359 @@ async function fetchAll(force) {
   setLoading(false);
 }
 
-/* ── UI state helpers ────────────────────────────────────── */
 function setLoading(on) {
-  var btn  = document.getElementById('refreshBtn');
-  var icon = document.getElementById('refreshIcon');
-  btn.disabled = on;
-  icon.classList.toggle('spin', on);
+  document.getElementById('refreshBtn').disabled = on;
+  document.getElementById('spinIcon').classList.toggle('spinning', on);
+}
+function showErr(msg) { var b=document.getElementById('errBanner'); document.getElementById('errMsg').textContent=msg; b.classList.add('show'); }
+function hideErr()    { document.getElementById('errBanner').classList.remove('show'); }
+
+/* ─── Render all ─────────────────────────────────────── */
+function renderAll() {
+  renderHeader();
+  renderPositions();
+  renderSummary();
+  renderAlloc();
 }
 
-/* ── Allocation chart helpers ────────────────────────────── */
-var ALLOC_COLORS = [
-  '#6EE7B7', // teal (matches --success)
-  '#818CF8', // indigo
-  '#FCD34D', // yellow
-  '#F87171', // coral
-  '#38BDF8', // sky
-  '#F97316', // orange
-  '#A78BFA', // violet
-  '#FB923C', // warm-orange
-  '#34D399', // emerald
-  '#60A5FA', // blue
-  '#E879F9', // fuchsia
-];
-
-function polarToCart(cx, cy, r, deg) {
-  var rad = ((deg - 90) * Math.PI) / 180;
-  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
-}
-function arcPath(cx, cy, R, r, a0, a1) {
-  if (a1 - a0 >= 360) a1 = a0 + 359.99;
-  var oS = polarToCart(cx, cy, R, a0), oE = polarToCart(cx, cy, R, a1);
-  var iE = polarToCart(cx, cy, r, a1), iS = polarToCart(cx, cy, r, a0);
-  var lg = (a1 - a0) > 180 ? 1 : 0;
-  return ['M', oS.x.toFixed(2), oS.y.toFixed(2),
-          'A', R, R, 0, lg, 1, oE.x.toFixed(2), oE.y.toFixed(2),
-          'L', iE.x.toFixed(2), iE.y.toFixed(2),
-          'A', r, r, 0, lg, 0, iS.x.toFixed(2), iS.y.toFixed(2), 'Z'].join(' ');
-}
-
-var _aTip = null;
-function showAllocTip(s, cx, cy) {
-  if (!_aTip) _aTip = document.getElementById('allocTooltip');
-  _aTip.innerHTML =
-      '<div style="font:700 10px/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:6px;">' + esc(s.symbol) + '</div>'
-    + '<div style="font:600 15px/1.3 var(--font-mono);font-variant-numeric:tabular-nums;color:var(--text-primary);">' + esc(fmt$(s.value)) + '</div>'
-    + '<div style="font:700 12px/1 var(--font-mono);color:' + s.color + ';margin-top:5px;">' + s.pct.toFixed(2) + '% of portfolio</div>';
-  _aTip.style.display = 'block';
-  moveAllocTip(cx, cy);
-}
-function moveAllocTip(cx, cy) {
-  if (!_aTip) return;
-  var w = _aTip.offsetWidth || 155, h = _aTip.offsetHeight || 72;
-  var x = cx + 14, y = cy - h / 2;
-  if (x + w > window.innerWidth  - 8) x = cx - w - 14;
-  if (y < 8)                          y = 8;
-  if (y + h > window.innerHeight - 8) y = window.innerHeight - h - 8;
-  _aTip.style.left = x + 'px'; _aTip.style.top = y + 'px';
-}
-function hideAllocTip() { if (_aTip) _aTip.style.display = 'none'; }
-
-function renderAllocation() {
-  var svgEl    = document.getElementById('allocSvg');
-  var legendEl = document.getElementById('allocLegend');
-  var cvEl     = document.getElementById('allocCenterVal');
-  var clEl     = document.getElementById('allocLabel');
-  var cpEl     = document.getElementById('allocCenterPct');
-  var noteEl   = document.getElementById('allocNote');
-  if (!svgEl) return;
-  svgEl.innerHTML = '';
-  legendEl.innerHTML = '';
-
-  var allPrices  = positions.length > 0 && positions.every(function(p) { return !!cache[p.symbol]; });
-  var somePrices = positions.some(function(p) { return !!cache[p.symbol]; });
-
-  var slices = [], totalVal = CASH;
-  positions.forEach(function(p) {
-    var q = cache[p.symbol];
-    var v = q ? q.price * p.shares : p.shares * p.avgCost;
-    totalVal += v;
-    slices.push({ symbol: p.symbol, name: p.name, value: v, hasPrice: !!q });
+/* ─── Header ─────────────────────────────────────────── */
+function renderHeader() {
+  var stockVal=0, todayPnl=0, oldest=Infinity, allHave=true;
+  positions.forEach(function(p){
+    var q=cache[p.symbol];
+    if (!q) { allHave=false; return; }
+    stockVal += q.price * p.shares;
+    todayPnl += q.change * p.shares;
+    if (q.fetchedAt < oldest) oldest=q.fetchedAt;
   });
-  slices.push({ symbol: 'Cash', name: 'Cash & Equivalents', value: CASH, hasPrice: true });
+  var total = stockVal + CASH;
+  if (allHave && positions.length) {
+    document.getElementById('hdrTotal').textContent = f$(total);
+    var prevStk = stockVal - todayPnl;
+    var pct     = prevStk > 0 ? (todayPnl/prevStk)*100 : 0;
+    var tEl     = document.getElementById('hdrToday');
+    tEl.textContent = fSgn(todayPnl) + ' (' + fPct(pct) + ') today';
+    tEl.className   = 'hdr-today ' + cls(todayPnl);
+    document.getElementById('hdrMeta').textContent = 'Updated ' + timeAgo(oldest);
+  } else if (Object.keys(cache).length) {
+    document.getElementById('hdrTotal').textContent = f$(stockVal + CASH);
+    document.getElementById('hdrMeta').textContent  = 'Partial data — tap Refresh';
+  } else {
+    document.getElementById('hdrTotal').textContent = '—';
+  }
+}
 
-  noteEl.style.display = allPrices ? 'none' : 'block';
+/* ─── Position cards ─────────────────────────────────── */
+function renderPositions() {
+  var list = document.getElementById('posList');
+  list.innerHTML = '';
+  positions.forEach(function(p){
+    var q    = cache[p.symbol];
+    var cost = p.shares * p.avgCost;
+    var val  = q ? q.price * p.shares : null;
+    var gl   = val != null ? val - cost : null;
+    var glP  = gl != null && cost > 0 ? (gl/cost)*100 : null;
+
+    var card = document.createElement('div');
+    card.className = 'pos-card' + (gl != null ? (gl > 0 ? ' up' : gl < 0 ? ' dn' : '') : '');
+
+    var priceH = q ? esc(f$(q.price)) : '<span class="dash">—</span>';
+    var dayH   = q
+      ? '<span class="pos-day ' + cls(q.change) + '">'
+        + esc((q.change>=0?'+':'')+f$(q.change)) + ' (' + esc(fPct(q.changePercent)) + ')'
+        + '</span>'
+      : '<span class="pos-day"><span class="dash">—</span></span>';
+    var valH = val != null ? esc(f$(val)) : '<span class="dash">—</span>';
+    var glH  = gl  != null
+      ? '<div class="pos-gl ' + cls(gl) + '">' + esc(fSgn(gl)) + ' (' + esc(fPct(glP)) + ')</div>'
+      : '<div class="pos-gl neu"><span class="dash">—</span></div>';
+
+    card.innerHTML =
+      '<div class="pos-top">'
+    +   '<div><div class="pos-sym">' + esc(p.symbol) + '</div><div class="pos-name">' + esc(p.name) + '</div></div>'
+    +   '<div class="pos-price-col"><div class="pos-price">' + priceH + '</div>' + dayH + '</div>'
+    + '</div>'
+    + '<div class="pos-bot">'
+    +   '<div class="pos-meta"><b>' + p.shares.toLocaleString('en-US') + '</b> shares<br>avg ' + esc(f$(p.avgCost)) + '</div>'
+    +   '<div class="pos-val-col"><div class="pos-total">' + valH + '</div>' + glH + '</div>'
+    + '</div>';
+
+    list.appendChild(card);
+  });
+}
+
+/* ─── Summary ────────────────────────────────────────── */
+function renderSummary() {
+  var stockVal=0, costBasis=0, todayPnl=0, ltGl=0, stGl=0;
+  var allHave = positions.length > 0 && positions.every(function(p){ return !!cache[p.symbol]; });
+  positions.forEach(function(p){
+    var q   = cache[p.symbol];
+    var cst = p.shares * p.avgCost;
+    costBasis += cst;
+    if (!q) return;
+    var v = q.price * p.shares;
+    stockVal  += v;
+    todayPnl  += q.change * p.shares;
+    var gl = v - cst;
+    if (p.term === 'short') stGl += gl; else ltGl += gl;
+  });
+  var total  = stockVal + CASH;
+  var totalGl = stockVal - costBasis;
+  var glPct  = costBasis > 0 ? (totalGl/costBasis)*100 : 0;
+  var prevStk = stockVal - todayPnl;
+  var tPct   = prevStk > 0 ? (todayPnl/prevStk)*100 : 0;
+  var ltPct  = costBasis > 0 ? (ltGl/costBasis)*100 : 0;
+
+  function set(id, txt, c) {
+    var el=document.getElementById(id);
+    if(!el) return;
+    el.textContent=txt;
+    el.className='summ-val' + (c?' '+c:'');
+  }
+  if (allHave) {
+    set('sTotal',  f$(total));
+    set('sToday',  fSgn(todayPnl) + ' (' + fPct(tPct) + ')',  cls(todayPnl));
+    set('sGl',     fSgn(totalGl)  + ' (' + fPct(glPct) + ')', cls(totalGl));
+    set('sStGl',   stGl===0 ? '$0.00' : fSgn(stGl),            cls(stGl));
+    set('sLtGl',   fSgn(ltGl)     + ' (' + fPct(ltPct) + ')', cls(ltGl));
+  }
+}
+
+/* ─── Allocation donut ───────────────────────────────── */
+function polarToCart(cx,cy,r,deg) {
+  var rad=((deg-90)*Math.PI)/180;
+  return {x:cx+r*Math.cos(rad), y:cy+r*Math.sin(rad)};
+}
+function arcPath(cx,cy,R,r,a0,a1) {
+  if (a1-a0>=360) a1=a0+359.99;
+  var oS=polarToCart(cx,cy,R,a0), oE=polarToCart(cx,cy,R,a1);
+  var iE=polarToCart(cx,cy,r,a1), iS=polarToCart(cx,cy,r,a0);
+  var lg=(a1-a0)>180?1:0;
+  return ['M',oS.x.toFixed(2),oS.y.toFixed(2),
+          'A',R,R,0,lg,1,oE.x.toFixed(2),oE.y.toFixed(2),
+          'L',iE.x.toFixed(2),iE.y.toFixed(2),
+          'A',r,r,0,lg,0,iS.x.toFixed(2),iS.y.toFixed(2),'Z'].join(' ');
+}
+var _tip = null;
+function showTip(s, cx, cy) {
+  if (!_tip) _tip = document.getElementById('allocTip');
+  _tip.innerHTML =
+    '<div style="font:700 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:5px;">' + esc(s.symbol) + '</div>'
+  + '<div style="font:600 14px/1.3 var(--mono);font-variant-numeric:tabular-nums;color:var(--text-1);">' + esc(f$(s.value)) + '</div>'
+  + '<div style="font:700 11px/1 var(--mono);color:' + s.color + ';margin-top:4px;">' + s.pct.toFixed(2) + '% of portfolio</div>';
+  _tip.style.display='block';
+  moveTip(cx,cy);
+}
+function moveTip(cx,cy) {
+  if(!_tip) return;
+  var w=_tip.offsetWidth||150, h=_tip.offsetHeight||68;
+  var x=cx+14, y=cy-h/2;
+  if (x+w > window.innerWidth-8)  x=cx-w-14;
+  if (y < 8)                       y=8;
+  if (y+h > window.innerHeight-8) y=window.innerHeight-h-8;
+  _tip.style.left=x+'px'; _tip.style.top=y+'px';
+}
+function hideTip() { if(_tip) _tip.style.display='none'; }
+
+function renderAlloc() {
+  var svgEl  = document.getElementById('allocSvg');
+  var legEl  = document.getElementById('allocLegend');
+  var cvEl   = document.getElementById('acVal');
+  var clEl   = document.getElementById('acLabel');
+  var cpEl   = document.getElementById('acPct');
+  if (!svgEl) return;
+  svgEl.innerHTML = ''; legEl.innerHTML = '';
+
+  var allPrices = positions.length > 0 && positions.every(function(p){ return !!cache[p.symbol]; });
+  var slices = [], total = CASH;
+  positions.forEach(function(p){
+    var q   = cache[p.symbol];
+    var val = q ? q.price*p.shares : p.shares*p.avgCost;
+    total += val;
+    slices.push({ symbol:p.symbol, name:p.name, value:val, hasPrice:!!q });
+  });
+  slices.push({ symbol:'Cash', name:'Cash & Equivalents', value:CASH, hasPrice:true });
+
   clEl.textContent = allPrices ? 'Portfolio' : 'Cost Basis';
-  cvEl.textContent = totalVal > 0 ? fmt$(totalVal) : '—';
+  cvEl.textContent = total > 0 ? f$(total) : '—';
   cpEl.textContent = '';
+  if (total <= 0) return;
 
-  if (totalVal <= 0) return;
+  var cx=100, cy=100, R=88, r=56, angle=0;
+  slices.forEach(function(sl, i) {
+    sl.pct   = (sl.value/total)*100;
+    sl.color = ALLOC_COLORS[i % ALLOC_COLORS.length];
+    var sweep = (sl.value/total)*360;
+    if (sweep < 0.3) { angle+=sweep; return; }
+    var endAngle = angle+sweep;
 
-  var cx = 100, cy = 100, R = 88, r = 56, angle = 0;
-
-  slices.forEach(function(slice, i) {
-    slice.pct   = (slice.value / totalVal) * 100;
-    slice.color = ALLOC_COLORS[i % ALLOC_COLORS.length];
-    var sweep   = (slice.value / totalVal) * 360;
-    if (sweep < 0.3) { angle += sweep; return; }
-    var endAngle = angle + sweep;
-
-    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', arcPath(cx, cy, R, r, angle, endAngle));
-    path.setAttribute('fill', slice.color);
+    var path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', arcPath(cx,cy,R,r,angle,endAngle));
+    path.setAttribute('fill', sl.color);
     path.setAttribute('stroke', '#050506');
     path.setAttribute('stroke-width', '1.5');
-    path.style.opacity    = '0.82';
-    path.style.cursor     = 'pointer';
-    path.style.transition = 'opacity 0.15s';
+    path.style.opacity='0.83';
+    path.style.cursor='pointer';
+    path.style.transition='opacity .15s';
 
-    (function(s, pe) {
-      function onIn(ex, ey) {
-        pe.style.opacity = '1';
-        clEl.textContent = s.symbol; cvEl.textContent = fmt$(s.value);
-        cpEl.textContent = s.pct.toFixed(1) + '%';
-        showAllocTip(s, ex, ey);
+    (function(s, pe){
+      function onIn(ex,ey) {
+        pe.style.opacity='1';
+        clEl.textContent=s.symbol;
+        cvEl.textContent=f$(s.value);
+        cpEl.textContent=s.pct.toFixed(1)+'%';
+        showTip(s,ex,ey);
       }
       function onOut() {
-        pe.style.opacity = '0.82';
-        clEl.textContent = allPrices ? 'Portfolio' : 'Cost Basis';
-        cvEl.textContent = fmt$(totalVal); cpEl.textContent = '';
-        hideAllocTip();
+        pe.style.opacity='0.83';
+        clEl.textContent=allPrices?'Portfolio':'Cost Basis';
+        cvEl.textContent=f$(total);
+        cpEl.textContent='';
+        hideTip();
       }
-      pe.addEventListener('mouseenter', function(e) { onIn(e.clientX, e.clientY); });
-      pe.addEventListener('mousemove',  function(e) { moveAllocTip(e.clientX, e.clientY); });
-      pe.addEventListener('mouseleave', onOut);
-      pe.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        var t = e.touches[0]; onIn(t.clientX, t.clientY);
-      }, { passive: false });
-      pe.addEventListener('touchend', function() { setTimeout(onOut, 1800); });
+      pe.addEventListener('mouseenter',function(e){onIn(e.clientX,e.clientY);});
+      pe.addEventListener('mousemove', function(e){moveTip(e.clientX,e.clientY);});
+      pe.addEventListener('mouseleave',onOut);
+      pe.addEventListener('touchstart',function(e){e.preventDefault();var t=e.touches[0];onIn(t.clientX,t.clientY);},{passive:false});
+      pe.addEventListener('touchend',function(){setTimeout(onOut,1800);});
 
-      // Legend row
-      var row = document.createElement('div');
-      row.className = 'alloc-leg-row';
-      row.innerHTML =
-          '<div class="alloc-dot" style="background:' + s.color + ';box-shadow:0 0 5px ' + s.color + '55;"></div>'
-        + '<span class="alloc-sym">' + esc(s.symbol) + '</span>'
-        + '<span class="alloc-pct">' + s.pct.toFixed(1) + '%</span>'
-        + '<span class="alloc-name">' + esc(s.name) + '</span>';
-      row.addEventListener('mouseenter', function(e) { onIn(e.clientX, e.clientY); });
-      row.addEventListener('mousemove',  function(e) { moveAllocTip(e.clientX, e.clientY); });
-      row.addEventListener('mouseleave', onOut);
-      legendEl.appendChild(row);
-    }(slice, path));
+      var row=document.createElement('div');
+      row.className='alloc-row';
+      row.innerHTML='<div class="alloc-dot" style="background:'+sl.color+';box-shadow:0 0 5px '+sl.color+'55;"></div>'
+        +'<span class="alloc-sym">'+esc(sl.symbol)+'</span>'
+        +'<span class="alloc-pct">'+sl.pct.toFixed(1)+'%</span>'
+        +'<span class="alloc-name">'+esc(sl.name)+'</span>';
+      row.addEventListener('mouseenter',function(e){onIn(e.clientX,e.clientY);});
+      row.addEventListener('mousemove', function(e){moveTip(e.clientX,e.clientY);});
+      row.addEventListener('mouseleave',onOut);
+      legEl.appendChild(row);
+    }(sl, path));
 
     svgEl.appendChild(path);
     angle = endAngle;
   });
 }
 
-/* ── Portfolio render ────────────────────────────────────── */
-function renderAll() {
-  renderHeader();
-  renderPositions();
-  renderSummary();
-  renderAllocation();
+/* ─── Edit Holdings Modal ────────────────────────────── */
+function openModal() {
+  renderModal();
+  document.getElementById('modalBg').classList.add('open');
+  document.body.style.overflow='hidden';
 }
-
-function renderHeader() {
-  var stocksVal = 0, todayPnl = 0, oldestFetch = Infinity;
-  var allHave = true;
-
-  positions.forEach(function(p) {
-    var q = cache[p.symbol];
-    if (!q) { allHave = false; return; }
-    stocksVal += q.price * p.shares;
-    todayPnl  += q.change * p.shares;
-    if (q.fetchedAt < oldestFetch) oldestFetch = q.fetchedAt;
-  });
-
-  if (allHave && positions.length > 0) {
-    var total   = stocksVal + CASH;
-    var prevStk = stocksVal - todayPnl;
-    var pct     = prevStk > 0 ? (todayPnl / prevStk) * 100 : 0;
-    document.getElementById('portTotal').textContent = fmt$(total);
-    var todayEl = document.getElementById('portToday');
-    todayEl.textContent = fmtSgn$(todayPnl) + ' (' + fmtPct(pct) + ') today';
-    todayEl.className   = 'port-today ' + cCls(todayPnl);
-    document.getElementById('portMeta').textContent = 'Updated ' + timeAgo(oldestFetch);
-  } else if (Object.keys(cache).length > 0) {
-    document.getElementById('portTotal').textContent = fmt$(stocksVal + CASH);
-    document.getElementById('portMeta').textContent = 'Partial data · tap Refresh';
-  } else {
-    document.getElementById('portTotal').textContent = '—';
-    document.getElementById('portMeta').textContent = 'Tap Refresh to load live prices';
-  }
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('open');
+  document.body.style.overflow='';
 }
-
-function renderPositions() {
-  var list = document.getElementById('posList');
-  list.innerHTML = '';
-
-  positions.forEach(function(p) {
-    var q     = cache[p.symbol];
-    var cost  = p.shares * p.avgCost;
-    var val   = q ? q.price * p.shares : null;
-    var gl    = val != null ? val - cost : null;
-    var glPct = gl != null && cost > 0 ? (gl / cost) * 100 : null;
-    var perfCls = gl != null ? (gl > 0 ? ' perf-pos' : gl < 0 ? ' perf-neg' : '') : '';
-    var card = document.createElement('div');
-    card.className = 'pos-card' + perfCls;
-
-    var priceHTML  = q ? esc(fmt$(q.price)) : '<span class="ndash">—</span>';
-    var dayHTML    = q
-      ? '<span class="' + cCls(q.change) + '">'
-          + esc((q.change >= 0 ? '+' : '') + fmt$(q.change))
-          + ' (' + esc(fmtPct(q.changePercent)) + ')'
-        + '</span>'
-      : '<span class="ndash">—</span>';
-    var valHTML = val != null ? esc(fmt$(val)) : '<span class="ndash">—</span>';
-    var glHTML  = gl != null
-      ? '<span class="' + cCls(gl) + '">'
-          + esc(fmtSgn$(gl)) + ' (' + esc(fmtPct(glPct)) + ')'
-        + '</span>'
-      : '<span class="ndash">—</span>';
-
-    card.innerHTML =
-        '<div class="pos-top">'
-      +   '<div>'
-      +     '<div class="pos-symbol">' + esc(p.symbol) + '</div>'
-      +     '<div class="pos-name">' + esc(p.name) + '</div>'
-      +   '</div>'
-      +   '<div class="pos-price-col">'
-      +     '<div class="pos-price">' + priceHTML + '</div>'
-      +     '<div class="pos-day">'   + dayHTML   + '</div>'
-      +   '</div>'
-      + '</div>'
-      + '<div class="pos-bottom">'
-      +   '<div class="pos-meta"><b>' + p.shares.toLocaleString('en-US') + '</b> shares<br>avg ' + esc(fmt$(p.avgCost)) + '</div>'
-      +   '<div class="pos-value-col">'
-      +     '<div class="pos-total-val">' + valHTML + '</div>'
-      +     '<div class="pos-gl">'        + glHTML  + '</div>'
-      +   '</div>'
-      + '</div>';
-
-    list.appendChild(card);
-  });
-}
-
-function renderSummary() {
-  var stocksVal = 0, costBasis = 0, todayPnl = 0, ltGl = 0, stGl = 0;
-  var allHave = positions.length > 0 && positions.every(function(p) { return !!cache[p.symbol]; });
-
-  positions.forEach(function(p) {
-    var q   = cache[p.symbol];
-    var cst = p.shares * p.avgCost;
-    costBasis += cst;
-    if (!q) return;
-    var v = q.price * p.shares;
-    stocksVal += v;
-    todayPnl  += q.change * p.shares;
-    var gl = v - cst;
-    if (p.term === 'short') stGl += gl; else ltGl += gl;
-  });
-
-  var total   = stocksVal + CASH;
-  var totalGl = stocksVal - costBasis;
-  var glPct   = costBasis > 0 ? (totalGl / costBasis) * 100 : 0;
-  var prevStk = stocksVal - todayPnl;
-  var tPct    = prevStk > 0 ? (todayPnl / prevStk) * 100 : 0;
-  var ltPct   = costBasis > 0 ? (ltGl / costBasis) * 100 : 0;
-
-  function set(id, text, cls) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.textContent = text;
-    el.className = 'summ-val' + (cls ? ' ' + cls : '');
-  }
-
-  if (allHave) {
-    set('summTotal',  fmt$(total));
-    set('summToday',  fmtSgn$(todayPnl) + ' (' + fmtPct(tPct) + ')',  cCls(todayPnl));
-    set('summGl',     fmtSgn$(totalGl)  + ' (' + fmtPct(glPct) + ')', cCls(totalGl));
-    set('summStGl',   stGl === 0 ? '$0.00' : fmtSgn$(stGl),            cCls(stGl));
-    set('summLtGl',   fmtSgn$(ltGl)     + ' (' + fmtPct(ltPct) + ')', cCls(ltGl));
-  }
-}
-
-/* ══════════════════════════════════════════
-   EDIT HOLDINGS MODAL
-   ══════════════════════════════════════════ */
-
-function openEdit() {
-  renderEditModal();
-  document.getElementById('editOverlay').classList.add('is-open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeEdit() {
-  document.getElementById('editOverlay').classList.remove('is-open');
-  document.body.style.overflow = '';
-}
-
-function renderEditModal() {
-  var body = document.getElementById('editBody');
+function renderModal() {
+  var body = document.getElementById('modalBody');
   body.innerHTML = '';
-  positions.forEach(function(p) {
-    body.appendChild(makeEditRow(p));
-  });
+  positions.forEach(function(p){ body.appendChild(makeRow(p)); });
 }
-
-function makeEditRow(p) {
+function makeRow(p) {
   var row = document.createElement('div');
   row.className = 'edit-row';
 
-  // Top: symbol input + name input + delete
   var top = document.createElement('div');
-  top.className = 'edit-row-top';
+  top.className = 'edit-top';
 
-  var symInput = document.createElement('input');
-  symInput.type = 'text';
-  symInput.className = 'edit-input inp-sym';
-  symInput.placeholder = 'TICK';
-  symInput.value = p.symbol || '';
-  symInput.maxLength = 10;
-  symInput.addEventListener('input', function() {
-    this.value = this.value.toUpperCase();
+  var sym = document.createElement('input');
+  sym.type='text'; sym.className='edit-inp inp-sym';
+  sym.placeholder='TICK'; sym.maxLength=10; sym.value=p.symbol||'';
+  sym.addEventListener('input',function(){ this.value=this.value.toUpperCase(); });
+
+  var name = document.createElement('input');
+  name.type='text'; name.className='edit-inp inp-name';
+  name.placeholder='Company name'; name.value=p.name||'';
+
+  var del = document.createElement('button');
+  del.type='button'; del.className='edit-del'; del.innerHTML='×';
+  del.addEventListener('click',function(){
+    row.style.transition='opacity .18s,transform .18s';
+    row.style.opacity='0'; row.style.transform='scale(.97)';
+    setTimeout(function(){ row.remove(); },180);
   });
 
-  var nameInput = document.createElement('input');
-  nameInput.type = 'text';
-  nameInput.className = 'edit-input inp-name';
-  nameInput.placeholder = 'Company name';
-  nameInput.value = p.name || '';
-
-  var delBtn = document.createElement('button');
-  delBtn.type = 'button';
-  delBtn.className = 'edit-delete';
-  delBtn.title = 'Remove position';
-  delBtn.innerHTML = '×';
-  delBtn.addEventListener('click', function() {
-    row.style.transition = 'opacity 0.18s, transform 0.18s';
-    row.style.opacity = '0';
-    row.style.transform = 'scale(0.97)';
-    setTimeout(function() { row.remove(); }, 180);
-  });
-
-  top.appendChild(symInput);
-  top.appendChild(nameInput);
-  top.appendChild(delBtn);
+  top.appendChild(sym); top.appendChild(name); top.appendChild(del);
   row.appendChild(top);
 
-  // Bottom: shares, avg cost, term
   var bot = document.createElement('div');
-  bot.className = 'edit-row-bot';
+  bot.className = 'edit-bot';
 
-  function makeField(labelText, input) {
-    var wrap = document.createElement('label');
-    wrap.className = 'edit-field';
-    var lbl = document.createElement('span');
-    lbl.className = 'edit-field-label';
-    lbl.textContent = labelText;
-    wrap.appendChild(lbl);
-    wrap.appendChild(input);
-    return wrap;
+  function field(lbl, inp) {
+    var w=document.createElement('label'); w.className='edit-field';
+    var l=document.createElement('span'); l.className='edit-field-lbl'; l.textContent=lbl;
+    w.appendChild(l); w.appendChild(inp); return w;
   }
 
-  var sharesInput = document.createElement('input');
-  sharesInput.type = 'number';
-  sharesInput.className = 'edit-input inp-shares';
-  sharesInput.placeholder = '0';
-  sharesInput.min = '0';
-  sharesInput.step = '1';
-  sharesInput.value = p.shares != null ? p.shares : '';
+  var shares = document.createElement('input');
+  shares.type='number'; shares.className='edit-inp inp-shares';
+  shares.placeholder='0'; shares.min='0'; shares.step='1';
+  shares.value = p.shares != null ? p.shares : '';
 
-  var termSelect = document.createElement('select');
-  termSelect.className = 'edit-select';
-  ['long', 'short'].forEach(function(val) {
-    var opt = document.createElement('option');
-    opt.value = val;
-    opt.textContent = val === 'long' ? 'Long' : 'Short';
-    if ((p.term || 'long') === val) opt.selected = true;
-    termSelect.appendChild(opt);
+  var term = document.createElement('select');
+  term.className = 'edit-sel';
+  ['long','short'].forEach(function(v){
+    var o=document.createElement('option'); o.value=v;
+    o.textContent=v==='long'?'Long':'Short';
+    if ((p.term||'long')===v) o.selected=true;
+    term.appendChild(o);
   });
 
-  bot.appendChild(makeField('Shares', sharesInput));
-  bot.appendChild(makeField('Term', termSelect));
+  bot.appendChild(field('Shares', shares));
+  bot.appendChild(field('Term',   term));
   row.appendChild(bot);
 
-  // avgCost is not shown as editable but is preserved on save
-  var savedAvgCost = p.avgCost != null ? p.avgCost : 0;
-
-  // Attach getters so saveHoldings can read values
-  row._getPosition = function() {
+  var savedCost = p.avgCost != null ? p.avgCost : 0;
+  row._get = function(){
     return {
-      symbol:  symInput.value.trim().toUpperCase(),
-      name:    nameInput.value.trim(),
-      shares:  parseFloat(sharesInput.value) || 0,
-      avgCost: savedAvgCost,
-      term:    termSelect.value
+      symbol:  sym.value.trim().toUpperCase(),
+      name:    name.value.trim(),
+      shares:  parseFloat(shares.value)||0,
+      avgCost: savedCost,
+      term:    term.value
     };
   };
-
   return row;
 }
-
-function addNewRow() {
-  var body = document.getElementById('editBody');
-  var row = makeEditRow({ symbol: '', name: '', shares: 0, avgCost: 0, term: 'long' });
+function addRow() {
+  var body=document.getElementById('modalBody');
+  var row=makeRow({symbol:'',name:'',shares:0,avgCost:0,term:'long'});
   body.appendChild(row);
-  // Scroll into view and focus symbol
-  row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  setTimeout(function() {
-    row.querySelector('.inp-sym').focus();
-  }, 180);
+  row.scrollIntoView({behavior:'smooth',block:'nearest'});
+  setTimeout(function(){ row.querySelector('.inp-sym').focus(); },180);
 }
-
 async function saveHoldings() {
-  var saveBtn = document.getElementById('editSave');
-  saveBtn.disabled = true;
-  saveBtn.textContent = 'Saving…';
-
-  var rows = Array.from(document.getElementById('editBody').querySelectorAll('.edit-row'));
-  var newPositions = [];
-  rows.forEach(function(row) {
-    if (typeof row._getPosition !== 'function') return;
-    var p = row._getPosition();
-    if (!p.symbol) return; // skip blank rows
-    newPositions.push(p);
-  });
-
-  // Replace live positions array
-  positions = newPositions;
-  positionsSave();
-
-  // Persist to Supabase (positions + existing price cache)
+  var btn=document.getElementById('btnSave');
+  btn.disabled=true; btn.textContent='Saving…';
+  var rows=Array.from(document.getElementById('modalBody').querySelectorAll('.edit-row'));
+  var newPos=[];
+  rows.forEach(function(r){ if (typeof r._get==='function'){ var p=r._get(); if(p.symbol) newPos.push(p); } });
+  positions = newPos;
+  posSave();
   await supaSave();
-
-  // Re-render dashboard
   renderAll();
-  closeEdit();
-
-  saveBtn.disabled = false;
-  saveBtn.textContent = 'Save Changes';
+  closeModal();
+  btn.disabled=false; btn.textContent='Save Changes';
 }
 
-/* ── Modal event wiring ──────────────────────────────────── */
-document.getElementById('editBtn').addEventListener('click', openEdit);
-document.getElementById('editClose').addEventListener('click', closeEdit);
-document.getElementById('editCancel').addEventListener('click', closeEdit);
-document.getElementById('addPosBtn').addEventListener('click', addNewRow);
-document.getElementById('editSave').addEventListener('click', saveHoldings);
+/* ─── Event wiring ───────────────────────────────────── */
+document.getElementById('refreshBtn').addEventListener('click',function(){ fetchAll(true); });
+document.getElementById('editBtn').addEventListener('click', openModal);
+document.getElementById('modalX').addEventListener('click',   closeModal);
+document.getElementById('btnCancel').addEventListener('click',closeModal);
+document.getElementById('btnAdd').addEventListener('click',   addRow);
+document.getElementById('btnSave').addEventListener('click',  saveHoldings);
+document.getElementById('modalBg').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&document.getElementById('modalBg').classList.contains('open')) closeModal(); });
 
-// Close on backdrop tap
-document.getElementById('editOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeEdit();
-});
-
-// Close on Escape key
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape' && document.getElementById('editOverlay').classList.contains('is-open')) {
-    closeEdit();
-  }
-});
-
-/* ── Refresh button ──────────────────────────────────────── */
-document.getElementById('refreshBtn').addEventListener('click', function() { fetchAll(true); });
-
-/* ── Boot ────────────────────────────────────────────────── */
+/* ─── Boot ───────────────────────────────────────────── */
 async function init() {
   cacheLoad();
-  positionsLoad();
-  renderAll();           // render from localStorage immediately
+  posLoad();
+  renderAll();
   await supaInit();
-  renderAll();           // re-render after merging Supabase data
-  await fetchAll(false); // skipped if cache is fresh
+  renderAll();
+  await fetchAll(false);
 }
 
 init();
