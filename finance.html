@@ -3473,27 +3473,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     resetBtn.addEventListener('click', async () => {
       resetBtn.textContent = 'Resetting…';
       resetBtn.disabled    = true;
-
-      // 1. Clear all finance keys from localStorage
-      const toRemove = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && (k.startsWith('nw:') || k === 'subs' || k === 'nw_currency' || k === 'finance_active_tab')) {
-          toRemove.push(k);
-        }
+      // Delegate to the atomic reset exposed by the sync IIFE, which suppresses
+      // the push timer and uses native localStorage methods to avoid the race
+      // where the debounced push restores old data via _fullRow before the delete.
+      if (typeof window._finReset === 'function') {
+        await window._finReset();
+      } else {
+        // Fallback (sync not yet initialised — shouldn't happen in practice)
+        window.location.reload();
       }
-      toRemove.forEach(k => localStorage.removeItem(k));
-
-      // 2. Delete the finance row from Supabase
-      try {
-        if (window.supabase) {
-          const supa = window.supabase.createClient(RESET_U, RESET_K);
-          await supa.from('app_state').delete().eq('key', 'finance');
-        }
-      } catch (_e) { /* offline — local data already cleared */ }
-
-      // 3. Reload fresh
-      window.location.reload();
     });
   })();
 
@@ -3579,6 +3567,27 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     const _origDel = localStorage.removeItem.bind(localStorage);
     localStorage.setItem = function (k, v) { _orig(k, v); if (!_suppress && _isOurs(k)) _schedule(); };
     localStorage.removeItem = function (k) { _origDel(k); if (!_suppress && _isOurs(k)) _schedule(); };
+
+    // Atomic reset: suppress sync, wipe localStorage via native methods (bypasses override),
+    // delete the Supabase row, then reload. Called by the reset confirmation button.
+    window._finReset = async function () {
+      _suppress = true;           // stop any pending or future push
+      clearTimeout(_timer);       // cancel debounced push
+      // Wipe all finance keys using native removeItem (no sync scheduling)
+      const toDel = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (_isOurs(k) || k === 'finance_active_tab')) toDel.push(k);
+      }
+      toDel.forEach(k => _origDel(k));
+      // Delete the Supabase finance row
+      const client = _supa || (window.supabase ? window.supabase.createClient(_U, _K) : null);
+      if (client) {
+        try { await client.from('app_state').delete().eq('key', _R); } catch (_e) {}
+      }
+      window.location.reload();
+    };
+
     window.addEventListener('pagehide', _flush);
     window.addEventListener('beforeunload', _flush);
     document.addEventListener('visibilitychange', () => { if (document.hidden) _flush(); });
