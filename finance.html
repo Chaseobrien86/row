@@ -617,7 +617,6 @@ body::after {
 }
 .inp-name  { flex: 1; min-width: 0; }
 .inp-shares { width: 88px; font-family: var(--font-mono); }
-.inp-cost   { width: 96px; font-family: var(--font-mono); }
 .edit-select {
   width: 88px;
   cursor: pointer;
@@ -762,9 +761,8 @@ body::after {
   .pos-total-val { font-size: 13px; }
   .summ-row.total .summ-val { font-size: 16px; }
   .cash-amt { font-size: 16px; }
-  .inp-sym   { width: 76px; }
+  .inp-sym    { width: 76px; }
   .inp-shares { width: 76px; }
-  .inp-cost   { width: 84px; }
   .edit-select { width: 76px; }
 }
 </style>
@@ -1022,24 +1020,35 @@ async function fetchAll(force) {
   setLoading(true);
 
   var syms = positions.map(function(p) { return p.symbol; }).join(',');
+  console.log('[finance] fetching quotes for:', syms);
   try {
-    var res  = await fetch('/api/quote?symbols=' + encodeURIComponent(syms));
-    var data = await res.json();
+    // Use comma directly in query string — Vercel decodes %2C correctly but
+    // plain commas also work and avoids any edge-case double-encoding.
+    var res  = await fetch('/api/quote?symbols=' + syms);
+    var text = await res.text();
+    console.log('[finance] /api/quote response status:', res.status, 'body:', text.slice(0, 400));
+    var data = JSON.parse(text);
     var now  = Date.now();
     if (data.quotes) {
       Object.keys(data.quotes).forEach(function(sym) {
         var q = data.quotes[sym];
-        cache[sym] = {
-          price:         q.price,
-          change:        q.change,
-          changePercent: q.changePercent,
-          prevClose:     q.prevClose,
-          fetchedAt:     now
-        };
+        if (q && q.price != null) {
+          cache[sym] = {
+            price:         q.price,
+            change:        q.change,
+            changePercent: q.changePercent,
+            prevClose:     q.prevClose,
+            fetchedAt:     now
+          };
+          console.log('[finance] cached', sym, '=', q.price);
+        }
       });
     }
+    if (data.errors && data.errors.length) {
+      console.warn('[finance] API errors:', data.errors);
+    }
   } catch (e) {
-    console.warn('fetchAll error:', e.message);
+    console.warn('[finance] fetchAll error:', e.message);
   }
 
   cacheSave();
@@ -1412,14 +1421,6 @@ function makeEditRow(p) {
   sharesInput.step = '1';
   sharesInput.value = p.shares != null ? p.shares : '';
 
-  var costInput = document.createElement('input');
-  costInput.type = 'number';
-  costInput.className = 'edit-input inp-cost';
-  costInput.placeholder = '0.00';
-  costInput.min = '0';
-  costInput.step = '0.01';
-  costInput.value = p.avgCost != null ? p.avgCost : '';
-
   var termSelect = document.createElement('select');
   termSelect.className = 'edit-select';
   ['long', 'short'].forEach(function(val) {
@@ -1431,9 +1432,11 @@ function makeEditRow(p) {
   });
 
   bot.appendChild(makeField('Shares', sharesInput));
-  bot.appendChild(makeField('Avg Cost $', costInput));
   bot.appendChild(makeField('Term', termSelect));
   row.appendChild(bot);
+
+  // avgCost is not shown as editable but is preserved on save
+  var savedAvgCost = p.avgCost != null ? p.avgCost : 0;
 
   // Attach getters so saveHoldings can read values
   row._getPosition = function() {
@@ -1441,7 +1444,7 @@ function makeEditRow(p) {
       symbol:  symInput.value.trim().toUpperCase(),
       name:    nameInput.value.trim(),
       shares:  parseFloat(sharesInput.value) || 0,
-      avgCost: parseFloat(costInput.value)   || 0,
+      avgCost: savedAvgCost,
       term:    termSelect.value
     };
   };
