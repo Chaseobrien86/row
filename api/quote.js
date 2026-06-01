@@ -1,44 +1,7 @@
-// Vercel serverless function — live stock quotes via Yahoo Finance chart API. No vercel.json needed.
+// Vercel serverless function – Yahoo Finance live quotes
 // GET /api/quote?symbols=TQQQ,TSM,NLR,AI,QTUM,MRVL
-// GET /api/quote?symbol=TQQQ   (single, backwards-compat)
-//
-// Returns: { quotes: { SYMBOL: { price, change, changePercent, prevClose } }, errors: [] }
-
-async function fetchYahoo(sym) {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=1d`;
-  console.log(`[quote] GET ${url}`);
-
-  const res = await fetch(url, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (compatible; portfolio-tracker/1.0)',
-      'Accept': 'application/json',
-    },
-  });
-
-  console.log(`[quote] ${sym} → HTTP ${res.status}`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-  const data = await res.json();
-  const meta = data?.chart?.result?.[0]?.meta;
-  const price = meta?.regularMarketPrice;
-
-  if (price == null || isNaN(price)) {
-    throw new Error(`no price in response (keys: ${Object.keys(meta || {}).slice(0, 6).join(',')})`);
-  }
-
-  const prevClose = meta.chartPreviousClose
-    ?? meta.regularMarketPreviousClose
-    ?? meta.previousClose
-    ?? price;
-
-  const change = parseFloat((price - prevClose).toFixed(4));
-  const changePercent = prevClose
-    ? parseFloat(((price - prevClose) / prevClose * 100).toFixed(4))
-    : 0;
-
-  console.log(`[quote] ${sym} OK: price=${price} prev=${prevClose} chg=${change} (${changePercent}%)`);
-  return { symbol: sym, price, change, changePercent, prevClose };
-}
+// Returns: [{symbol, price, change, changePercent, previousClose}]
+// Null entry for any symbol that fails.
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -51,26 +14,57 @@ module.exports = async (req, res) => {
   if (!raw) return res.status(400).json({ error: 'symbols param required' });
 
   const syms = raw.split(',').map(s => s.trim()).filter(Boolean);
-  const invalid = syms.find(s => !/^[A-Z0-9.\-^=]{1,12}$/.test(s));
-  if (invalid) return res.status(400).json({ error: `invalid symbol: ${invalid}` });
 
-  console.log(`[quote] batch: ${syms.join(', ')}`);
-
-  const quotes = {};
-  const errors = [];
-
+  const results = [];
   for (const sym of syms) {
     try {
-      quotes[sym] = await fetchYahoo(sym);
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=1d`;
+      console.log(`[quote] fetching ${sym}`);
+
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'application/json',
+          'Accept-Language': 'en-US,en;q=0.9',
+        },
+      });
+
+      if (!response.ok) {
+        console.error(`[quote] ${sym} HTTP ${response.status}`);
+        results.push(null);
+        continue;
+      }
+
+      const data = await response.json();
+      const meta = data?.chart?.result?.[0]?.meta;
+
+      if (!meta) {
+        console.error(`[quote] ${sym} no meta in response`);
+        results.push(null);
+        continue;
+      }
+
+      const price         = meta.regularMarketPrice ?? null;
+      const previousClose = meta.chartPreviousClose ?? meta.previousClose ?? null;
+      const change        = (price != null && previousClose != null)
+        ? parseFloat((price - previousClose).toFixed(4))
+        : (meta.regularMarketChange ?? null);
+      const changePercent = (price != null && previousClose != null && previousClose !== 0)
+        ? parseFloat(((price - previousClose) / previousClose * 100).toFixed(4))
+        : (meta.regularMarketChangePercent ?? null);
+
+      console.log(`[quote] ${sym} OK price=${price} prev=${previousClose} chg=${change} chgPct=${changePercent}`);
+      results.push({ symbol: sym, price, change, changePercent, previousClose });
     } catch (err) {
-      errors.push(`${sym}: ${err.message}`);
-      console.error(`[quote] FAIL ${sym}:`, err.message);
+      console.error(`[quote] ${sym} error:`, err.message);
+      results.push(null);
     }
+
+    // small gap to avoid triggering rate limits
     if (syms.indexOf(sym) < syms.length - 1) {
-      await new Promise(r => setTimeout(r, 120));
+      await new Promise(r => setTimeout(r, 150));
     }
   }
 
-  console.log(`[quote] done ${Object.keys(quotes).length}/${syms.length} ok`);
-  return res.status(200).json({ quotes, errors });
+  return res.status(200).json(results);
 };
