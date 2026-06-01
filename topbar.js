@@ -2,7 +2,7 @@
 // Global bottom navigation bar.
 // Drop this on any page with:
 //     <script src="topbar.js" defer></script>
-// Self-injects a fixed 6-tab bottom nav: Main · Water · Stack · Sleep · Gym · Finance
+// Self-injects a fixed 5-tab bottom nav: Main · Water · Stack · Sleep · Gym
 // =============================================================
 (function () {
   'use strict';
@@ -47,15 +47,6 @@ body {
 /* Modal body lock */
 body.topbar-modal-open { overflow: hidden; touch-action: none; }
 
-/* Push finance.html's internal tab bar above the global nav */
-.bottom-tabs {
-  bottom: calc(var(--gbn-h) + env(safe-area-inset-bottom));
-}
-/* Give the finance content shell room for both nav bars */
-.shell {
-  padding-bottom: calc(var(--gbn-h) + 90px + env(safe-area-inset-bottom)) !important;
-}
-
 /* === Global mobile polish === */
 html, body { -webkit-text-size-adjust: 100%; }
 @media (max-width: 768px) {
@@ -89,12 +80,11 @@ html, body { -webkit-text-size-adjust: 100%; }
   // -------- HTML --------
   const html = `
 <nav class="bottomnav" id="bottomnav" role="navigation" aria-label="Main navigation">
-  <a href="index.html"   class="bn-tab" data-page="main"    >Main</a>
-  <a href="water.html"   class="bn-tab" data-page="water"   >Water</a>
-  <a href="health.html"  class="bn-tab" data-page="health"  >Stack</a>
-  <a href="sleep.html"   class="bn-tab" data-page="sleep"   >Sleep</a>
-  <a href="gym.html"     class="bn-tab" data-page="gym"     >Gym</a>
-  <a href="finance.html" class="bn-tab" data-page="finance" >Finance</a>
+  <a href="index.html"  class="bn-tab" data-page="main"  >Main</a>
+  <a href="water.html"  class="bn-tab" data-page="water" >Water</a>
+  <a href="health.html" class="bn-tab" data-page="health">Stack</a>
+  <a href="sleep.html"  class="bn-tab" data-page="sleep" >Sleep</a>
+  <a href="gym.html"    class="bn-tab" data-page="gym"   >Gym</a>
 </nav>
 `;
 
