@@ -1,4 +1,4 @@
-// Vercel serverless function — live stock quotes via Yahoo Finance chart API.
+// Vercel serverless function — live stock quotes via Yahoo Finance chart API. No vercel.json needed.
 // GET /api/quote?symbols=TQQQ,TSM,NLR,AI,QTUM,MRVL
 // GET /api/quote?symbol=TQQQ   (single, backwards-compat)
 //
