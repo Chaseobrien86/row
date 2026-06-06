@@ -169,6 +169,164 @@ body::after {
   transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* ===== Page header row ===== */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.page-header .dash-title { margin: 0; }
+
+.gear-btn {
+  width: 42px; height: 42px; flex-shrink: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px; line-height: 1;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.gear-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: var(--text-primary);
+}
+.gear-btn:active { transform: rotate(35deg) scale(0.90); }
+
+/* ===== Settings modal ===== */
+.modal-bg {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-bg.show { opacity: 1; pointer-events: auto; }
+
+.modal {
+  position: relative;
+  width: 100%; max-width: 440px;
+  max-height: 90vh; overflow-y: auto;
+  background: rgba(14, 14, 16, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 20px;
+  padding: 28px 28px 24px;
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
+}
+
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px;
+}
+.modal-title {
+  font-size: 18px; font-weight: 700; letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.modal-close {
+  width: 32px; height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 8px; background: rgba(255, 255, 255, 0.04);
+  color: var(--text-tertiary); font-size: 18px; line-height: 1;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.modal-close:hover { background: rgba(255, 255, 255, 0.08); color: var(--text-primary); }
+
+/* field rows */
+.s-field { margin-bottom: 18px; }
+.s-label {
+  display: block; margin-bottom: 7px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text-tertiary);
+}
+.s-input {
+  width: 100%; padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px; background: rgba(0, 0, 0, 0.32);
+  color: var(--text-primary); font-family: inherit; font-size: 14px;
+  outline: none; transition: border-color 0.2s, background 0.2s;
+  appearance: textfield; -moz-appearance: textfield;
+}
+.s-input::-webkit-inner-spin-button,
+.s-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.s-input::placeholder { color: var(--text-tertiary); }
+.s-input:focus { border-color: rgba(255, 255, 255, 0.26); background: rgba(0, 0, 0, 0.42); }
+
+/* field row with inline toggle */
+.s-input-row { display: flex; gap: 8px; align-items: center; }
+.s-input-row .s-input { flex: 1; }
+.s-narrow { max-width: 80px; }
+
+/* segmented toggle */
+.seg {
+  display: inline-flex; flex-shrink: 0;
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.28);
+}
+.seg-btn {
+  padding: 8px 14px; border: 0; background: transparent;
+  color: var(--text-tertiary); font-family: inherit;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.seg-btn:not(:last-child) { border-right: 1px solid rgba(255, 255, 255, 0.06); }
+.seg-btn.active {
+  background: rgba(255, 255, 255, 0.10);
+  color: var(--text-primary);
+}
+
+/* full-width seg (Sex) */
+.seg.full { width: 100%; }
+.seg.full .seg-btn { flex: 1; text-align: center; }
+
+/* ft/in pair */
+#htFtFields { display: flex; gap: 6px; flex: 1; }
+#htFtFields .s-input { min-width: 0; }
+
+/* divider */
+.modal-divider {
+  height: 1px; background: rgba(255, 255, 255, 0.06);
+  margin: 22px 0;
+}
+
+/* save button */
+.s-save {
+  width: 100%; padding: 12px;
+  border: 0; border-radius: 12px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #E8E5DD 100%);
+  color: #0A0A0B; font-family: inherit; font-size: 14px; font-weight: 700;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 8px rgba(0,0,0,0.35);
+  transition: filter 0.15s, transform 0.1s, background 0.35s, color 0.35s;
+}
+.s-save:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.s-save:active { transform: translateY(0); }
+.s-save.saved {
+  background: linear-gradient(180deg, #6BE3A4 0%, #4CC98A 100%);
+  color: #04200E;
+}
+
+/* mobile fullscreen override (reused from topbar.js pattern) */
+@media (max-width: 480px) {
+  .modal-bg { padding: 0; align-items: flex-end; }
+  .modal {
+    max-width: 100%; max-height: 92vh;
+    border-radius: 20px 20px 0 0;
+    padding-bottom: max(28px, env(safe-area-inset-bottom));
+  }
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 720px) {
   .bento {
@@ -194,7 +352,10 @@ body::after {
 <body>
 <div class="page">
 
-  <h1 class="dash-title">Dashboard</h1>
+  <div class="page-header">
+    <h1 class="dash-title">Dashboard</h1>
+    <button class="gear-btn" id="gearBtn" type="button" aria-label="Settings">⚙️</button>
+  </div>
 
   <div class="bento">
 
@@ -277,6 +438,265 @@ body::after {
     </a>
 
   </div>
+</div><!-- /.page -->
+
+<!-- ===== Settings modal ===== -->
+<div class="modal-bg" id="settingsModalBg" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="modal" id="settingsModal">
+    <div class="modal-header">
+      <div class="modal-title" id="settingsTitle">Your Data</div>
+      <button class="modal-close" id="settingsClose" type="button" aria-label="Close">×</button>
+    </div>
+
+    <!-- Height -->
+    <div class="s-field">
+      <label class="s-label">Height</label>
+      <div class="s-input-row">
+        <div id="htCmFields" style="display:flex;flex:1;">
+          <input class="s-input" id="heightCmInput" type="number" placeholder="e.g. 180" min="50" max="280">
+        </div>
+        <div id="htFtFields" style="display:none;flex:1;gap:6px;">
+          <input class="s-input" id="heightFtInput" type="number" placeholder="ft" min="1" max="9">
+          <input class="s-input" id="heightInInput" type="number" placeholder="in" min="0" max="11">
+        </div>
+        <div class="seg" style="margin-left:8px;">
+          <button class="seg-btn active" id="htCm" type="button">cm</button>
+          <button class="seg-btn"        id="htFt" type="button">ft/in</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weight -->
+    <div class="s-field">
+      <label class="s-label">Weight</label>
+      <div class="s-input-row">
+        <input class="s-input" id="weightInput" type="number" placeholder="e.g. 80" min="20" max="500">
+        <div class="seg" style="margin-left:8px;">
+          <button class="seg-btn active" id="wtKg" type="button">kg</button>
+          <button class="seg-btn"        id="wtLb" type="button">lb</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Age -->
+    <div class="s-field">
+      <label class="s-label">Age</label>
+      <input class="s-input" id="ageInput" type="number" placeholder="e.g. 28" min="10" max="120">
+    </div>
+
+    <!-- Sex -->
+    <div class="s-field">
+      <label class="s-label">Sex</label>
+      <div class="seg full">
+        <button class="seg-btn" id="sexMale"   type="button">Male</button>
+        <button class="seg-btn" id="sexFemale" type="button">Female</button>
+      </div>
+    </div>
+
+    <!-- Activity -->
+    <div class="s-field">
+      <label class="s-label">Active hours / week</label>
+      <input class="s-input" id="activityInput" type="number" placeholder="e.g. 5" min="0" max="168" step="0.5">
+    </div>
+
+    <div class="modal-divider"></div>
+
+    <button class="s-save" id="settingsSave" type="button">Save</button>
+  </div>
 </div>
+
+<script>
+(function () {
+  'use strict';
+
+  const WATER_KEY = 'po_water_v1';
+
+  function loadWater() {
+    try { return JSON.parse(localStorage.getItem(WATER_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function saveWater(d) {
+    try { localStorage.setItem(WATER_KEY, JSON.stringify(d)); } catch (e) {}
+  }
+
+  const gearBtn    = document.getElementById('gearBtn');
+  const modalBg    = document.getElementById('settingsModalBg');
+  const closeBtn   = document.getElementById('settingsClose');
+  const saveBtn    = document.getElementById('settingsSave');
+
+  const htCmBtn    = document.getElementById('htCm');
+  const htFtBtn    = document.getElementById('htFt');
+  const htCmFields = document.getElementById('htCmFields');
+  const htFtFields = document.getElementById('htFtFields');
+  const htCmInput  = document.getElementById('heightCmInput');
+  const htFtInput  = document.getElementById('heightFtInput');
+  const htInInput  = document.getElementById('heightInInput');
+
+  const wtKgBtn    = document.getElementById('wtKg');
+  const wtLbBtn    = document.getElementById('wtLb');
+  const wtInput    = document.getElementById('weightInput');
+
+  const ageInput   = document.getElementById('ageInput');
+  const actInput   = document.getElementById('activityInput');
+  const sexMale    = document.getElementById('sexMale');
+  const sexFemale  = document.getElementById('sexFemale');
+
+  let curHtUnit = 'cm';
+  let curWtUnit = 'kg';
+
+  // ── Unit helpers ─────────────────────────────────────────────
+
+  function setHtUnit(unit, convert) {
+    curHtUnit = unit;
+    htCmBtn.classList.toggle('active', unit === 'cm');
+    htFtBtn.classList.toggle('active', unit === 'ft');
+    htCmFields.style.display = unit === 'cm' ? 'flex' : 'none';
+    htFtFields.style.display = unit === 'ft' ? 'flex' : 'none';
+    if (!convert) return;
+    if (unit === 'ft') {
+      const cm = parseFloat(htCmInput.value);
+      if (!isNaN(cm) && cm > 0) {
+        const totalIn = cm / 2.54;
+        htFtInput.value = Math.floor(totalIn / 12);
+        htInInput.value = Math.round(totalIn % 12);
+      }
+    } else {
+      const ft  = parseFloat(htFtInput.value) || 0;
+      const ins = parseFloat(htInInput.value) || 0;
+      if (ft || ins) htCmInput.value = Math.round(ft * 30.48 + ins * 2.54);
+    }
+  }
+
+  function setWtUnit(unit, convert) {
+    curWtUnit = unit;
+    wtKgBtn.classList.toggle('active', unit === 'kg');
+    wtLbBtn.classList.toggle('active', unit === 'lb');
+    if (!convert) return;
+    const v = parseFloat(wtInput.value);
+    if (isNaN(v)) return;
+    wtInput.value = unit === 'lb'
+      ? Math.round(v * 2.20462 * 10) / 10
+      : Math.round(v / 2.20462 * 10) / 10;
+  }
+
+  function getHeightCm() {
+    if (curHtUnit === 'cm') return parseFloat(htCmInput.value) || null;
+    const ft  = parseFloat(htFtInput.value) || 0;
+    const ins = parseFloat(htInInput.value) || 0;
+    return (ft || ins) ? ft * 30.48 + ins * 2.54 : null;
+  }
+
+  function getWeightKg() {
+    const v = parseFloat(wtInput.value);
+    if (isNaN(v)) return null;
+    return curWtUnit === 'kg' ? v : v / 2.20462;
+  }
+
+  function getSex() {
+    if (sexMale.classList.contains('active'))   return 'male';
+    if (sexFemale.classList.contains('active')) return 'female';
+    return '';
+  }
+
+  // ── Open / close ─────────────────────────────────────────────
+
+  function openModal() {
+    const data = loadWater();
+    const p    = data.profile || {};
+
+    curHtUnit = p.heightUnit || 'cm';
+    setHtUnit(curHtUnit, false);
+    if (curHtUnit === 'cm') {
+      htCmInput.value = p.heightCm ? Math.round(p.heightCm) : '';
+    } else if (p.heightCm) {
+      const totalIn = p.heightCm / 2.54;
+      htFtInput.value = Math.floor(totalIn / 12);
+      htInInput.value = Math.round(totalIn % 12);
+    } else {
+      htFtInput.value = '';
+      htInInput.value = '';
+    }
+
+    curWtUnit = data.weightUnit || 'kg';
+    setWtUnit(curWtUnit, false);
+    wtInput.value = p.weightKg
+      ? (curWtUnit === 'kg'
+          ? Math.round(p.weightKg * 10) / 10
+          : Math.round(p.weightKg * 2.20462 * 10) / 10)
+      : '';
+
+    ageInput.value = p.age || '';
+    actInput.value = p.activityHrsPerWeek != null ? p.activityHrsPerWeek : '';
+    sexMale.classList.toggle('active',   p.sex === 'male');
+    sexFemale.classList.toggle('active', p.sex === 'female');
+
+    modalBg.classList.add('show');
+    setTimeout(function () {
+      (curHtUnit === 'cm' ? htCmInput : htFtInput).focus();
+    }, 60);
+  }
+
+  function closeModal() { modalBg.classList.remove('show'); }
+
+  // ── Save ─────────────────────────────────────────────────────
+
+  function save() {
+    const data = loadWater();
+    if (!data.profile) data.profile = {};
+
+    const hCm = getHeightCm();
+    const wKg = getWeightKg();
+    const age = parseInt(ageInput.value, 10);
+    const act = parseFloat(actInput.value);
+
+    if (hCm != null) {
+      data.profile.heightCm   = Math.round(hCm * 10) / 10;
+      data.profile.heightUnit = curHtUnit;
+    }
+    if (wKg != null) {
+      data.profile.weightKg = Math.round(wKg * 100) / 100;
+      data.weightUnit       = curWtUnit;
+    }
+    if (!isNaN(age) && age > 0)  data.profile.age = age;
+    if (getSex())                 data.profile.sex = getSex();
+    if (!isNaN(act) && act >= 0) data.profile.activityHrsPerWeek = act;
+
+    saveWater(data);
+
+    saveBtn.textContent = 'Saved ✓';
+    saveBtn.classList.add('saved');
+    setTimeout(function () {
+      saveBtn.textContent = 'Save';
+      saveBtn.classList.remove('saved');
+    }, 1800);
+  }
+
+  // ── Events ───────────────────────────────────────────────────
+
+  gearBtn.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  modalBg.addEventListener('click', function (e) { if (e.target === modalBg) closeModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+  saveBtn.addEventListener('click', save);
+
+  htCmBtn.addEventListener('click', function () { setHtUnit('cm', true); });
+  htFtBtn.addEventListener('click', function () { setHtUnit('ft', true); });
+  wtKgBtn.addEventListener('click', function () { setWtUnit('kg', true); });
+  wtLbBtn.addEventListener('click', function () { setWtUnit('lb', true); });
+
+  sexMale.addEventListener('click', function () {
+    sexMale.classList.add('active');
+    sexFemale.classList.remove('active');
+  });
+  sexFemale.addEventListener('click', function () {
+    sexFemale.classList.add('active');
+    sexMale.classList.remove('active');
+  });
+
+  [htCmInput, htFtInput, htInInput, wtInput, ageInput, actInput].forEach(function (el) {
+    el.addEventListener('keydown', function (e) { if (e.key === 'Enter') save(); });
+  });
+})();
+</script>
 </body>
 </html>
