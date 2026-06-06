@@ -1,8 +1,8 @@
 // =============================================================
-// Global bottom navigation bar.
+// Global bottom navigation bar + home icon.
 // Drop this on any page with:
 //     <script src="topbar.js" defer></script>
-// Self-injects a fixed 5-tab bottom nav: Main · Water · Stack · Sleep · Gym
+// Injects: fixed 6-tab bottom nav + fixed home icon (all pages except index.html)
 // =============================================================
 (function () {
   'use strict';
@@ -47,6 +47,32 @@ body {
 /* Modal body lock */
 body.topbar-modal-open { overflow: hidden; touch-action: none; }
 
+/* === Home icon === */
+.gbn-home {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  left: 16px;
+  z-index: 999;
+  display: flex; align-items: center; justify-content: center;
+  height: 36px; padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(10, 10, 11, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.80);
+  font-size: 16px;
+  line-height: 1;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.gbn-home:hover {
+  border-color: rgba(255, 255, 255, 0.30);
+  color: #FFFFFF;
+  background: rgba(10, 10, 11, 0.88);
+}
+
 /* === Global mobile polish === */
 html, body { -webkit-text-size-adjust: 100%; }
 @media (max-width: 768px) {
@@ -80,11 +106,12 @@ html, body { -webkit-text-size-adjust: 100%; }
   // -------- HTML --------
   const html = `
 <nav class="bottomnav" id="bottomnav" role="navigation" aria-label="Main navigation">
-  <a href="main.html"   class="bn-tab" data-page="main"  >Main</a>
-  <a href="water.html"  class="bn-tab" data-page="water" >Water</a>
-  <a href="health.html" class="bn-tab" data-page="health">Stack</a>
-  <a href="sleep.html"  class="bn-tab" data-page="sleep" >Sleep</a>
-  <a href="gym.html"    class="bn-tab" data-page="gym"   >Gym</a>
+  <a href="main.html"      class="bn-tab" data-page="main"     >Main</a>
+  <a href="water.html"     class="bn-tab" data-page="water"    >Water</a>
+  <a href="health.html"    class="bn-tab" data-page="health"   >Stack</a>
+  <a href="sleep.html"     class="bn-tab" data-page="sleep"    >Sleep</a>
+  <a href="caffeine.html"  class="bn-tab" data-page="caffeine" >Caffeine</a>
+  <a href="gym.html"       class="bn-tab" data-page="gym"      >Gym</a>
 </nav>
 `;
 
@@ -98,6 +125,21 @@ html, body { -webkit-text-size-adjust: 100%; }
     const wrap = document.createElement('div');
     wrap.innerHTML = html.trim();
     document.body.appendChild(wrap.firstChild);
+  }
+
+  // -------- Home icon (all pages except index.html) --------
+  function injectHomeIcon() {
+    if (document.getElementById('gbn-home')) return;
+    const path = window.location.pathname.toLowerCase();
+    const isHub = path.endsWith('index.html') || path === '/' || path.endsWith('/');
+    if (isHub) return;
+    const a = document.createElement('a');
+    a.id        = 'gbn-home';
+    a.className = 'gbn-home';
+    a.href      = 'index.html';
+    a.setAttribute('aria-label', 'Home');
+    a.textContent = '🏠';
+    document.body.appendChild(a);
   }
 
   // -------- Active page highlight --------
@@ -150,6 +192,7 @@ html, body { -webkit-text-size-adjust: 100%; }
   // -------- Boot --------
   function boot() {
     injectStyleAndHTML();
+    injectHomeIcon();
     markActive();
     lockGestures();
     startModalLock();
