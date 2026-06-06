@@ -80,7 +80,7 @@ html, body { -webkit-text-size-adjust: 100%; }
   // -------- HTML --------
   const html = `
 <nav class="bottomnav" id="bottomnav" role="navigation" aria-label="Main navigation">
-  <a href="index.html"  class="bn-tab" data-page="main"  >Main</a>
+  <a href="main.html"   class="bn-tab" data-page="main"  >Main</a>
   <a href="water.html"  class="bn-tab" data-page="water" >Water</a>
   <a href="health.html" class="bn-tab" data-page="health">Stack</a>
   <a href="sleep.html"  class="bn-tab" data-page="sleep" >Sleep</a>
@@ -107,7 +107,7 @@ html, body { -webkit-text-size-adjust: 100%; }
       const pg = t.dataset.page;
       let active = false;
       if (pg === 'main') {
-        active = path.endsWith('index.html') || path === '/' || path.endsWith('/');
+        active = path.endsWith('main.html');
       } else {
         active = path.endsWith(pg + '.html');
       }
